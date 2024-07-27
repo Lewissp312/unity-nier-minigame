@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour
     }
 
     void SpawnEnemies(){
-        int enemyToSpawn = Random.Range(0,2);
+        int enemyToSpawn = Random.Range(0,3);
         int position = Random.Range(0,13);
         Instantiate(enemies[enemyToSpawn],enemy1Positions[position],enemies[enemyToSpawn].transform.rotation);
     }

@@ -26,7 +26,7 @@ public class Enemy : MonoBehaviour
         if (gameObject.CompareTag("Enemy 1")){
             transform.position = Vector3.MoveTowards(transform.position,gameManager.enemy1Positions[randEnemy1Position],speed*Time.deltaTime);
         }
-        else if(gameObject.CompareTag("Enemy 2")){
+        else{
             transform.Rotate(0,speed*Time.deltaTime,0);
         }
     }
