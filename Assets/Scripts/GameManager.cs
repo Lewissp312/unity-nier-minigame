@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // InvokeRepeating(nameof(SpawnEnemies),1,10);
+        InvokeRepeating(nameof(SpawnEnemies),1,10);
     }
 
     // Update is called once per frame

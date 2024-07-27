@@ -31,6 +31,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        transform.position = new Vector3(transform.position.x,0.02f,transform.position.z);
         float horizontalMovement = Input.GetAxis("Horizontal");
         float verticalMovement = Input.GetAxis("Vertical");
         float rightStickHorizontal = Input.GetAxis("RightStickHorizontal");
@@ -40,7 +41,9 @@ public class PlayerController : MonoBehaviour
         MovementRestrictions();
         if ((Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2) || Input.GetKey(KeyCode.JoystickButton5)) && canShoot){
             laserPosition = (transform.forward * 2) + transform.position;
-            laserRotation = new Quaternion(laser.transform.rotation.x,transform.rotation.y,laser.transform.rotation.z,laser.transform.rotation.w);
+            // laserRotation = new Quaternion(laser.transform.rotation.x,transform.rotation.y,laser.transform.rotation.z,laser.transform.rotation.w);
+            // Instantiate(laser,laserPosition,laserRotation);
+            laserRotation = new Quaternion(transform.rotation.x,transform.rotation.y,transform.rotation.z + 5,transform.rotation.w);
             Instantiate(laser,laserPosition,laserRotation);
             StartCoroutine(WaitToShoot());
         }
@@ -95,13 +98,19 @@ public class PlayerController : MonoBehaviour
         if (other.gameObject.CompareTag("Enemy Laser")){
             lives--;
             Destroy(other.gameObject);
+        }
+        if (lives<=0){
+            Destroy(gameObject);
+        }
+    }
+
+    void OnCollisionEnter(Collision other){
+        if (other.gameObject.CompareTag("Enemy Box")){
+            Debug.Log("Collided");
+            lives--;
             if (lives<=0){
                 Destroy(gameObject);
             }
         }
     }
 }
-
-
-//Type: mouse movement
-//Axis: X axis 

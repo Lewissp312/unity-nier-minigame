@@ -22,4 +22,11 @@ public class Laser : MonoBehaviour
         transform.position += fireDirection * Time.deltaTime;
         gameManager.MovementRestrictions(gameObject);
     }
+
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.CompareTag("Enemy Box")){
+            Destroy(gameObject);
+        }
+    }
 }
