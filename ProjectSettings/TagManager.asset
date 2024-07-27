@@ -9,6 +9,7 @@ TagManager:
   - Enemy Laser
   - Enemy 1
   - Enemy 2
+  - Enemy Box
   layers:
   - Default
   - TransparentFX
