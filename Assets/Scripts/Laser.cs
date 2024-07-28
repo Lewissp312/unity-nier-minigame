@@ -25,7 +25,7 @@ public class Laser : MonoBehaviour
 
     void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.CompareTag("Enemy Box")){
+        if (other.gameObject.CompareTag("Enemy Box") || other.gameObject.CompareTag("Shield")){
             Destroy(gameObject);
         }
     }
