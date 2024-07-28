@@ -62,8 +62,14 @@ public class GameManager : MonoBehaviour
     }
 
     void SpawnEnemies(){
-        int enemyToSpawn = Random.Range(0,3);
-        int position = Random.Range(0,13);
-        Instantiate(enemies[enemyToSpawn],enemy1Positions[position],enemies[enemyToSpawn].transform.rotation);
+        GameObject enemyToSpawn = enemies[Random.Range(0,4)];
+        if (enemyToSpawn.CompareTag("Enemy 1") || enemyToSpawn.CompareTag("Enemy 4")){
+            enemyToSpawn.GetComponent<Enemy>().isMovingEnemy = true;
+        }
+        else{
+            enemyToSpawn.GetComponent<Enemy>().isMovingEnemy = false;
+        }
+        // int enemyToSpawn = Random.Range(0,4);
+        Instantiate(enemyToSpawn,enemy1Positions[Random.Range(0,13)],enemyToSpawn.transform.rotation);
     }
 }
