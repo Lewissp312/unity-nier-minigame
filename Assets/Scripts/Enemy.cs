@@ -6,13 +6,16 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     public GameObject enemyLaser;
+    public bool isMovingEnemy;
     private float speed = 10f;
     private int lives = 10;
     private int randEnemy1Position = 0;
+    private bool isShieldDestroyed;
     private GameManager gameManager;
     // Start is called before the first frame update
     void Start()
     {
+        isShieldDestroyed = false;
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
         InvokeRepeating(nameof(ShootLasers),Random.Range(0,6),2);
         if (gameObject.CompareTag("Enemy 1")){
@@ -23,11 +26,25 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameObject.CompareTag("Enemy 1")){
+        if (isMovingEnemy){
             transform.position = Vector3.MoveTowards(transform.position,gameManager.enemy1Positions[randEnemy1Position],speed*Time.deltaTime);
         }
         else{
             transform.Rotate(0,speed*Time.deltaTime,0);
+        }
+        if (gameObject.CompareTag("Enemy 4")){
+            // transform.GetChild(0).gameObject.transform.position = transform.position;
+            //Replace this with system in which the number of enemies for each wave is generated in gameManager.
+            //This is then looked at to determine how many enemies are left.
+            //When there is one enemy left, release the shield
+            if (!isShieldDestroyed){
+                if (GameObject.FindGameObjectsWithTag("Enemy 1").Length==0 && 
+                GameObject.FindGameObjectsWithTag("Enemy 2").Length==0 && 
+                GameObject.FindGameObjectsWithTag("Enemy 3").Length==0){
+                    Destroy(transform.GetChild(0).gameObject);
+                    isShieldDestroyed = true;
+                }
+            }
         }
     }
 
