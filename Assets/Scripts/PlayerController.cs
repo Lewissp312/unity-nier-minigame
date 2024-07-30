@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     private GameManager gameManager;
     private string[] controllers;
     public GameObject laser;
+    public ParticleSystem damageEffect;
     public LayerMask layersToHit;
     // public GameObject camera;
 
@@ -96,6 +97,9 @@ public class PlayerController : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Enemy Laser")){
+            ParticleSystem damageEffectCopy = Instantiate(damageEffect,transform.position,transform.rotation);
+            damageEffectCopy.Play();
+            Destroy(damageEffectCopy,damageEffectCopy.main.duration);
             lives--;
             Destroy(other.gameObject);
         }

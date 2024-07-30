@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -6,6 +7,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     public GameObject enemyLaser;
+    public ParticleSystem damageEffect;
     public bool isMovingEnemy;
     private float speed = 10f;
     private int lives = 10;
@@ -15,6 +17,7 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
         isShieldDestroyed = false;
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
         InvokeRepeating(nameof(ShootLasers),Random.Range(0,6),2);
@@ -67,6 +70,11 @@ public class Enemy : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Laser")){
             lives--;
+            ParticleSystem damageEffectCopy = Instantiate(damageEffect,transform.position,transform.rotation);
+            damageEffectCopy.Play();
+            Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
+            // StartCoroutine(WaitForDamageEffect(effect));
+            // damageEffect.Play();
             Destroy(collision.gameObject);
             if(lives<=0){
                 Destroy(gameObject);
