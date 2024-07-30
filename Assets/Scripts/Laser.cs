@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Laser : MonoBehaviour
 {
+    public ParticleSystem destroyEffect;
     private Vector3 fireDirection;
     private float speed = 25;
     private GameManager gameManager;
@@ -26,6 +27,9 @@ public class Laser : MonoBehaviour
     void OnCollisionEnter(Collision other)
     {
         if (other.gameObject.CompareTag("Enemy Box") || other.gameObject.CompareTag("Shield")){
+            ParticleSystem destroyEffectCopy = Instantiate(destroyEffect,transform.position,transform.rotation);
+            destroyEffectCopy.Play();
+            Destroy(destroyEffectCopy,destroyEffectCopy.main.duration);
             Destroy(gameObject);
         }
     }
