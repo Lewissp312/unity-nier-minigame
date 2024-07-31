@@ -6,33 +6,8 @@ public class GameManager : MonoBehaviour
     public float xBound = 40;
     public float zBound = 40;
     public GameObject[] enemies;
-    public Vector3[] enemy1Positions = {
-        //centre, 0
-        new Vector3(0,-0.119999997f,0),
-        //centre left, 1
-        new Vector3(10.0900002f,-0.119999997f,0),
-        //centre right, 2
-        new Vector3(-10.0900002f,-0.119999997f,0),
-        //centre bottom left, 3
-        new Vector3(10.0900002f,-0.119999997f,-0.100000001f),
-        //centre bottom right, 4
-        new Vector3(-10.0100002f,-0.119999997f,-0.0700000003f),
-        //centre top right, 5
-        new Vector3(-10.0100002f,-0.119999997f,-10.2f),
-        //centre top left, 6
-        new Vector3(10.0900002f,-0.119999997f,-10.5200005f),
-        //left, 7
-        new Vector3(15.04f,-0.119999997f,0),
-        //right, 8
-        new Vector3(-9.80000019f,-0.119999997f,0),
-        //top left, 9
-        new Vector3(15.04f,-0.119999997f,-15.6000004f),
-        //top right, 10
-        new Vector3(-9.80000019f,-0.119999997f,-16.2099991f),
-        //bottom right, 11
-        new Vector3(-9.80000019f,-0.119999997f,12.1899996f),
-        //bottom left, 12
-        new Vector3(15.04f,-0.119999997f,12.2799997f)};
+    
+    private Vector3 posToSpawnOn;
     // Start is called before the first frame update
     void Start()
     {
@@ -69,7 +44,7 @@ public class GameManager : MonoBehaviour
         else{
             enemyToSpawn.GetComponent<Enemy>().isMovingEnemy = false;
         }
-        // int enemyToSpawn = Random.Range(0,4);
-        Instantiate(enemyToSpawn,enemy1Positions[Random.Range(0,13)],enemyToSpawn.transform.rotation);
+        posToSpawnOn = new Vector3(Random.Range(-16.5f,20.6f),-0.119999997f,Random.Range(-21.3f,15.8f));
+        Instantiate(enemyToSpawn,posToSpawnOn,enemyToSpawn.transform.rotation);
     }
 }

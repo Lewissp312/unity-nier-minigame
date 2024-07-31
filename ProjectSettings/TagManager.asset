@@ -10,6 +10,9 @@ TagManager:
   - Enemy 1
   - Enemy 2
   - Enemy Box
+  - Shield
+  - Enemy 3
+  - Enemy 4
   layers:
   - Default
   - TransparentFX
