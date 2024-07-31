@@ -12,6 +12,7 @@ public class Enemy : MonoBehaviour
     private float speed = 10f;
     private int lives = 10;
     private int randEnemy1Position = 0;
+    private Vector3 posToMoveTo;
     private bool isShieldDestroyed;
     private GameManager gameManager;
     // Start is called before the first frame update
@@ -20,17 +21,25 @@ public class Enemy : MonoBehaviour
 
         isShieldDestroyed = false;
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
+        //Lasers start after a random amount of time so that all enemies aren't firing at the same time
         InvokeRepeating(nameof(ShootLasers),Random.Range(0,6),2);
-        if (gameObject.CompareTag("Enemy 1")){
+        if (isMovingEnemy){
             InvokeRepeating(nameof(ChangeEnemyPosition),1,Random.Range(5,11));
         }
+        posToMoveTo = new Vector3(Random.Range(-16.5f,20.6f),-0.119999997f,Random.Range(-21.3f,15.8f));
     }
 
     // Update is called once per frame
     void Update()
     {
         if (isMovingEnemy){
-            transform.position = Vector3.MoveTowards(transform.position,gameManager.enemy1Positions[randEnemy1Position],speed*Time.deltaTime);
+        //     private float xBoundRight = -16.5f;
+        //     private float xBoundLeft = 20.5f;
+        //     private float zBoundDown = 15.7f;
+        //     private float zBoundUp = -21.3f;
+            // transform.position = Vector3.MoveTowards(transform.position,gameManager.enemy1Positions[randEnemy1Position],speed*Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position,posToMoveTo,speed*Time.deltaTime);
+
         }
         else{
             transform.Rotate(0,speed*Time.deltaTime,0);
@@ -63,6 +72,7 @@ public class Enemy : MonoBehaviour
     }
 
     void ChangeEnemyPosition(){
+        posToMoveTo = new Vector3(Random.Range(-16.5f,20.6f),-0.119999997f,Random.Range(-21.3f,15.8f));
         randEnemy1Position = Random.Range(0,9);
     }
 
