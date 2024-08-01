@@ -32,31 +32,34 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = new Vector3(transform.position.x,0.02f,transform.position.z);
-        float horizontalMovement = Input.GetAxis("Horizontal");
-        float verticalMovement = Input.GetAxis("Vertical");
-        float rightStickHorizontal = Input.GetAxis("RightStickHorizontal");
-        float rightStickVertical = Input.GetAxis("RightStickVertical");
-        transform.Translate(horizontalMovement * speed * Time.deltaTime * Vector3.left,Space.World);
-        transform.Translate(verticalMovement * speed * Time.deltaTime * Vector3.back,Space.World);
-        MovementRestrictions();
-        if ((Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2) || Input.GetKey(KeyCode.JoystickButton5)) && canShoot){
-            laserPosition = (transform.forward * 2) + transform.position;
-            // laserRotation = new Quaternion(laser.transform.rotation.x,transform.rotation.y,laser.transform.rotation.z,laser.transform.rotation.w);
-            // Instantiate(laser,laserPosition,laserRotation);
-            laserRotation = new Quaternion(transform.rotation.x,transform.rotation.y,transform.rotation.z + 5,transform.rotation.w);
-            Instantiate(laser,laserPosition,laserRotation);
-            StartCoroutine(WaitToShoot());
-        }
-        if (controllers.Length == 0){
-            transform.LookAt(gameManager.GetMouseOnBoardPosition());
-        }
-        else{
-            if (!(rightStickHorizontal > -0.9f && rightStickHorizontal < 0.9f)){
-                Debug.Log(rightStickHorizontal);
-                transform.Rotate(0,rightStickHorizontal,0);
+        if (gameManager.GetIsGameActive()){
+            transform.position = new Vector3(transform.position.x,0.02f,transform.position.z);
+            float horizontalMovement = Input.GetAxis("Horizontal");
+            float verticalMovement = Input.GetAxis("Vertical");
+            float rightStickHorizontal = Input.GetAxis("RightStickHorizontal");
+            float rightStickVertical = Input.GetAxis("RightStickVertical");
+            transform.Translate(horizontalMovement * speed * Time.deltaTime * Vector3.left,Space.World);
+            transform.Translate(verticalMovement * speed * Time.deltaTime * Vector3.back,Space.World);
+            MovementRestrictions();
+            if ((Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2) || Input.GetKey(KeyCode.JoystickButton5)) && canShoot){
+                laserPosition = (transform.forward * 2) + transform.position;
+                // laserRotation = new Quaternion(laser.transform.rotation.x,transform.rotation.y,laser.transform.rotation.z,laser.transform.rotation.w);
+                // Instantiate(laser,laserPosition,laserRotation);
+                laserRotation = new Quaternion(transform.rotation.x,transform.rotation.y,transform.rotation.z + 5,transform.rotation.w);
+                Instantiate(laser,laserPosition,laserRotation);
+                StartCoroutine(WaitToShoot());
+            }
+            if (controllers.Length == 0){
+                transform.LookAt(gameManager.GetMouseOnBoardPosition());
+            }
+            else{
+                if (!(rightStickHorizontal > -0.9f && rightStickHorizontal < 0.9f)){
+                    Debug.Log(rightStickHorizontal);
+                    transform.Rotate(0,rightStickHorizontal,0);
+                }
             }
         }
+        
     }
 
     public float GetXBoundRight(){
@@ -104,6 +107,7 @@ public class PlayerController : MonoBehaviour
             Destroy(other.gameObject);
         }
         if (lives<=0){
+            gameManager.EndGame();
             Destroy(gameObject);
         }
     }
@@ -113,6 +117,7 @@ public class PlayerController : MonoBehaviour
             Debug.Log("Collided");
             lives--;
             if (lives<=0){
+                gameManager.EndGame();
                 Destroy(gameObject);
             }
         }

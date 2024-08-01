@@ -18,7 +18,6 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
         isShieldDestroyed = false;
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
         //Lasers start after a random amount of time so that all enemies aren't firing at the same time
@@ -32,29 +31,31 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (isMovingEnemy){
-        //     private float xBoundRight = -16.5f;
-        //     private float xBoundLeft = 20.5f;
-        //     private float zBoundDown = 15.7f;
-        //     private float zBoundUp = -21.3f;
-            // transform.position = Vector3.MoveTowards(transform.position,gameManager.enemy1Positions[randEnemy1Position],speed*Time.deltaTime);
-            transform.position = Vector3.MoveTowards(transform.position,posToMoveTo,speed*Time.deltaTime);
+        if (gameManager.GetIsGameActive()){
+            if (isMovingEnemy){
+            //     private float xBoundRight = -16.5f;
+            //     private float xBoundLeft = 20.5f;
+            //     private float zBoundDown = 15.7f;
+            //     private float zBoundUp = -21.3f;
+                // transform.position = Vector3.MoveTowards(transform.position,gameManager.enemy1Positions[randEnemy1Position],speed*Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position,posToMoveTo,speed*Time.deltaTime);
 
-        }
-        else{
-            transform.Rotate(0,speed*Time.deltaTime,0);
-        }
-        if (gameObject.CompareTag("Enemy 4")){
-            // transform.GetChild(0).gameObject.transform.position = transform.position;
-            //Replace this with system in which the number of enemies for each wave is generated in gameManager.
-            //This is then looked at to determine how many enemies are left.
-            //When there is one enemy left, release the shield
-            if (!isShieldDestroyed){
-                if (GameObject.FindGameObjectsWithTag("Enemy 1").Length==0 && 
-                GameObject.FindGameObjectsWithTag("Enemy 2").Length==0 && 
-                GameObject.FindGameObjectsWithTag("Enemy 3").Length==0){
-                    Destroy(transform.GetChild(0).gameObject);
-                    isShieldDestroyed = true;
+            }
+            else{
+                transform.Rotate(0,speed*Time.deltaTime,0);
+            }
+            if (gameObject.CompareTag("Enemy 4")){
+                // transform.GetChild(0).gameObject.transform.position = transform.position;
+                //Replace this with system in which the number of enemies for each wave is generated in gameManager.
+                //This is then looked at to determine how many enemies are left.
+                //When there is one enemy left, release the shield
+                if (!isShieldDestroyed){
+                    if (GameObject.FindGameObjectsWithTag("Enemy 1").Length==0 && 
+                    GameObject.FindGameObjectsWithTag("Enemy 2").Length==0 && 
+                    GameObject.FindGameObjectsWithTag("Enemy 3").Length==0){
+                        Destroy(transform.GetChild(0).gameObject);
+                        isShieldDestroyed = true;
+                    }
                 }
             }
         }
