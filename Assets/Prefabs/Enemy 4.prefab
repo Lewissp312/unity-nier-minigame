@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 756714503109875928}
   m_Layer: 0
   m_Name: Enemy 4
-  m_TagString: Enemy 4
+  m_TagString: Shield Sphere
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -113,7 +113,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyLaser: {fileID: 4185834950684278263, guid: 861c24a6763e04aff8f93ec5898c4cc1, type: 3}
   damageEffect: {fileID: 2257364063208976271, guid: 7eda49dc1597b4fa1aab429aebe3c4a8, type: 3}
-  isMovingEnemy: 0
+  isMovingEnemy: 1
 --- !u!1 &9098432262086442456
 GameObject:
   m_ObjectHideFlags: 0

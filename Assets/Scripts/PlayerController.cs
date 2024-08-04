@@ -114,7 +114,6 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter(Collision other){
         if (other.gameObject.CompareTag("Enemy Box")){
-            Debug.Log("Collided");
             lives--;
             if (lives<=0){
                 gameManager.EndGame();

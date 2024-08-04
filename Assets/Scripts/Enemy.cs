@@ -8,7 +8,7 @@ public class Enemy : MonoBehaviour
 {
     public GameObject enemyLaser;
     public ParticleSystem damageEffect;
-    public bool isMovingEnemy;
+    public bool isMovingEnemy = false;
     private float speed = 10f;
     private int lives = 10;
     private int randEnemy1Position = 0;
@@ -28,7 +28,7 @@ public class Enemy : MonoBehaviour
         posToMoveTo = new Vector3(Random.Range(-16.5f,20.6f),-0.119999997f,Random.Range(-21.3f,15.8f));
     }
 
-    // Update is called once per frame
+    // Update is called once per frame    
     void Update()
     {
         if (gameManager.GetIsGameActive()){
@@ -44,21 +44,23 @@ public class Enemy : MonoBehaviour
             else{
                 transform.Rotate(0,speed*Time.deltaTime,0);
             }
-            if (gameObject.CompareTag("Enemy 4")){
+            if (gameObject.CompareTag("Shield Sphere")){
                 // transform.GetChild(0).gameObject.transform.position = transform.position;
                 //Replace this with system in which the number of enemies for each wave is generated in gameManager.
                 //This is then looked at to determine how many enemies are left.
                 //When there is one enemy left, release the shield
                 if (!isShieldDestroyed){
-                    if (GameObject.FindGameObjectsWithTag("Enemy 1").Length==0 && 
-                    GameObject.FindGameObjectsWithTag("Enemy 2").Length==0 && 
-                    GameObject.FindGameObjectsWithTag("Enemy 3").Length==0){
+                    if (gameManager.GetNumOfEnemies() == 1){
                         Destroy(transform.GetChild(0).gameObject);
                         isShieldDestroyed = true;
                     }
                 }
             }
         }
+    }
+
+    public void SetIsMovingEnemy(bool isMovingEnemyValue){
+        isMovingEnemy = isMovingEnemyValue;
     }
 
     void ShootLasers(){
@@ -88,6 +90,7 @@ public class Enemy : MonoBehaviour
             // damageEffect.Play();
             Destroy(collision.gameObject);
             if(lives<=0){
+                gameManager.SetNumOfEnemies(-1);
                 Destroy(gameObject);
             }
         }   
