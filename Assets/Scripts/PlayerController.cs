@@ -43,9 +43,7 @@ public class PlayerController : MonoBehaviour
             MovementRestrictions();
             if ((Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2) || Input.GetKey(KeyCode.JoystickButton5)) && canShoot){
                 laserPosition = (transform.forward * 2) + transform.position;
-                // laserRotation = new Quaternion(laser.transform.rotation.x,transform.rotation.y,laser.transform.rotation.z,laser.transform.rotation.w);
-                // Instantiate(laser,laserPosition,laserRotation);
-                laserRotation = new Quaternion(transform.rotation.x,transform.rotation.y,transform.rotation.z + 5,transform.rotation.w);
+                laserRotation = transform.rotation * Quaternion.Euler(90,0,0);
                 Instantiate(laser,laserPosition,laserRotation);
                 StartCoroutine(WaitToShoot());
             }
