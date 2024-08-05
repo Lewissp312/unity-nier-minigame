@@ -104,7 +104,7 @@ public class PlayerController : MonoBehaviour
         if (other.gameObject.CompareTag("Enemy Laser")){
             ParticleSystem damageEffectCopy = Instantiate(damageEffect,transform.position,transform.rotation);
             damageEffectCopy.Play();
-            Destroy(damageEffectCopy,damageEffectCopy.main.duration);
+            Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
             lives--;
             Destroy(other.gameObject);
         }

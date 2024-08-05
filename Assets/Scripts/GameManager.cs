@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -58,6 +59,10 @@ public class GameManager : MonoBehaviour
         DestroyAllEnemies("Laser");
         endScreen.SetActive(true);
         CancelInvoke();
+    }
+
+    public void ResetGame(){
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     public Vector3 GetMouseOnBoardPosition(){
         Ray ray;
@@ -135,25 +140,6 @@ public class GameManager : MonoBehaviour
         } 
     }
 
-    IEnumerator WaitForNextWave(){
-        yield return new WaitForSeconds(5);
-        nextWaveScreen.SetActive(false);
-        SpawnWave();
-        isBetweenWaves = false;
-    }
-
-    // void SpawnEnemies(){
-    //     GameObject enemyToSpawn = enemies[Random.Range(0,4)];
-    //     if (enemyToSpawn.CompareTag("Enemy 3") || enemyToSpawn.CompareTag("Enemy 4")){
-    //         enemyToSpawn.GetComponent<Enemy>().isMovingEnemy = true;
-    //     }
-    //     else{
-    //         enemyToSpawn.GetComponent<Enemy>().isMovingEnemy = false;
-    //     }
-    //     posToSpawnOn = new Vector3(Random.Range(-16.5f,20.6f),-0.119999997f,Random.Range(-21.3f,15.8f));
-    //     Instantiate(enemyToSpawn,posToSpawnOn,enemyToSpawn.transform.rotation);
-    // }
-
     void DestroyAllEnemies(string enemyType){
         GameObject[] enemies = GameObject.FindGameObjectsWithTag(enemyType);
         if (enemies.Length>0){
@@ -161,5 +147,12 @@ public class GameManager : MonoBehaviour
                 Destroy(enemy);
             }
         }
+    }
+
+    IEnumerator WaitForNextWave(){
+        yield return new WaitForSeconds(5);
+        nextWaveScreen.SetActive(false);
+        SpawnWave();
+        isBetweenWaves = false;
     }
 }

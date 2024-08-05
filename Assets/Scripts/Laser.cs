@@ -29,7 +29,7 @@ public class Laser : MonoBehaviour
         if (other.gameObject.CompareTag("Enemy Box") || other.gameObject.CompareTag("Shield")){
             ParticleSystem destroyEffectCopy = Instantiate(destroyEffect,transform.position,transform.rotation);
             destroyEffectCopy.Play();
-            Destroy(destroyEffectCopy,destroyEffectCopy.main.duration);
+            Destroy(destroyEffectCopy.gameObject,destroyEffectCopy.main.duration);
             Destroy(gameObject);
         }
     }
