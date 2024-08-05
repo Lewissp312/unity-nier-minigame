@@ -60,6 +60,10 @@ public class PlayerController : MonoBehaviour
         
     }
 
+    public Vector3 GetPlayerPosition(){
+        return transform.position;
+    }
+
     public float GetXBoundRight(){
         return this.xBoundRight;
     }
