@@ -2,7 +2,6 @@ using System.Collections;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class GameManager : MonoBehaviour
 {
@@ -22,7 +21,6 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
         isGameActive = false;
         isBetweenWaves = false;
         numOfEnemies = 3;
@@ -47,7 +45,6 @@ public class GameManager : MonoBehaviour
         nextWaveScreen.SetActive(true);
         waveText.text = $"Wave: {wave}";
         StartCoroutine(WaitForNextWave());
-        // InvokeRepeating(nameof(SpawnEnemies),1,10);
     }
 
     public void EndGame(){
@@ -56,6 +53,9 @@ public class GameManager : MonoBehaviour
         DestroyAllEnemies("Shield Cylinder");
         DestroyAllEnemies("Sphere");
         DestroyAllEnemies("Shield Sphere");
+        DestroyAllEnemies("Homing Cone");
+        DestroyAllEnemies("Enemy Laser");
+        DestroyAllEnemies("Laser");
         endScreen.SetActive(true);
         CancelInvoke();
     }
@@ -98,19 +98,19 @@ public class GameManager : MonoBehaviour
             numOfEnemies = 6;
         }
         else if(wave<10){ //wave 7,8,9
-            SpawnEnemies(2,4,3);
+            SpawnEnemies(2,5,3);
             numOfEnemies = 3;
         }
         else if(wave<13){ //wave 10,11,12
-            SpawnEnemies(2,4,6);
+            SpawnEnemies(2,5,6);
             numOfEnemies = 6;
         }
         else if(wave<16){ //wave 13,14,15
-            SpawnEnemies(0,4,3);
+            SpawnEnemies(0,5,3);
             numOfEnemies = 3;
         }
         else if(wave>=16){ //waves beyond
-            SpawnEnemies(0,4,6);
+            SpawnEnemies(0,5,6);
             numOfEnemies = 6;
         }
         waveText.text = $"Wave: {wave}";

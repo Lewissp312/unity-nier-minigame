@@ -1,12 +1,10 @@
-using System.Collections;
 using Unity.VisualScripting;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
     public GameObject enemyLaser;
+    public PlayerController playerController;
     public ParticleSystem damageEffect;
     public bool isMovingEnemy = false;
     private float speed = 10f;
@@ -20,12 +18,13 @@ public class Enemy : MonoBehaviour
     {
         isShieldDestroyed = false;
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
+        playerController = GameObject.Find("Player").GetComponent<PlayerController>();
         //Lasers start after a random amount of time so that all enemies aren't firing at the same time
         InvokeRepeating(nameof(ShootLasers),Random.Range(0,6),2);
         if (isMovingEnemy){
             InvokeRepeating(nameof(ChangeEnemyPosition),1,Random.Range(5,11));
+            posToMoveTo = new Vector3(Random.Range(-16.5f,20.6f),-0.119999997f,Random.Range(-21.3f,15.8f));
         }
-        posToMoveTo = new Vector3(Random.Range(-16.5f,20.6f),-0.119999997f,Random.Range(-21.3f,15.8f));
     }
 
     // Update is called once per frame    
@@ -33,22 +32,16 @@ public class Enemy : MonoBehaviour
     {
         if (gameManager.GetIsGameActive()){
             if (isMovingEnemy){
-            //     private float xBoundRight = -16.5f;
-            //     private float xBoundLeft = 20.5f;
-            //     private float zBoundDown = 15.7f;
-            //     private float zBoundUp = -21.3f;
-                // transform.position = Vector3.MoveTowards(transform.position,gameManager.enemy1Positions[randEnemy1Position],speed*Time.deltaTime);
                 transform.position = Vector3.MoveTowards(transform.position,posToMoveTo,speed*Time.deltaTime);
-
+            }
+            else if (gameObject.CompareTag("Homing Cone")){
+                transform.LookAt(playerController.GetPlayerPosition());
+                transform.position = Vector3.MoveTowards(transform.position,playerController.GetPlayerPosition(),2*Time.deltaTime);
             }
             else{
                 transform.Rotate(0,speed*Time.deltaTime,0);
             }
             if (gameObject.CompareTag("Shield Sphere")){
-                // transform.GetChild(0).gameObject.transform.position = transform.position;
-                //Replace this with system in which the number of enemies for each wave is generated in gameManager.
-                //This is then looked at to determine how many enemies are left.
-                //When there is one enemy left, release the shield
                 if (!isShieldDestroyed){
                     if (gameManager.GetNumOfEnemies() == 1){
                         Destroy(transform.GetChild(0).gameObject);
@@ -66,12 +59,14 @@ public class Enemy : MonoBehaviour
     void ShootLasers(){
         GameObject upLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
         upLaser.GetComponent<EnemyLaser>().selectedDirection = EnemyLaser.Direction.FORWARD;
-        GameObject rightLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
-        rightLaser.GetComponent<EnemyLaser>().selectedDirection = EnemyLaser.Direction.RIGHT;
-        GameObject backLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
-        backLaser.GetComponent<EnemyLaser>().selectedDirection = EnemyLaser.Direction.BACK;
-        GameObject leftLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
-        leftLaser.GetComponent<EnemyLaser>().selectedDirection = EnemyLaser.Direction.LEFT;
+        if (!gameObject.CompareTag("Homing Cone")){
+            GameObject rightLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
+            rightLaser.GetComponent<EnemyLaser>().selectedDirection = EnemyLaser.Direction.RIGHT;
+            GameObject backLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
+            backLaser.GetComponent<EnemyLaser>().selectedDirection = EnemyLaser.Direction.BACK;
+            GameObject leftLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
+            leftLaser.GetComponent<EnemyLaser>().selectedDirection = EnemyLaser.Direction.LEFT;
+        }
     }
 
     void ChangeEnemyPosition(){
@@ -86,8 +81,6 @@ public class Enemy : MonoBehaviour
             ParticleSystem damageEffectCopy = Instantiate(damageEffect,transform.position,transform.rotation);
             damageEffectCopy.Play();
             Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
-            // StartCoroutine(WaitForDamageEffect(effect));
-            // damageEffect.Play();
             Destroy(collision.gameObject);
             if(lives<=0){
                 gameManager.SetNumOfEnemies(-1);
@@ -96,7 +89,3 @@ public class Enemy : MonoBehaviour
         }   
     }
 }
-
-
-//Original camera position: Vector3(2.61133742,34.211998,-2.5123179)
-//Original camera rotation: Quaternion(0.000846950687,-0.709633112,0.704570472,0.000848291093)
