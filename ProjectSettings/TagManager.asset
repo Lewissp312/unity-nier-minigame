@@ -17,6 +17,7 @@ TagManager:
   - Shield Sphere
   - Cylinder
   - Shield Cylinder
+  - Homing Cone
   layers:
   - Default
   - TransparentFX
