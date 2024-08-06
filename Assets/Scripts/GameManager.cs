@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
     public GameObject nextWaveScreen;
     public GameObject endScreen; 
     public TextMeshProUGUI waveText;
+    public TextMeshProUGUI timerText;
+    private Coroutine countDownCoroutine;
     // private Vector3 posToSpawnOn;
     private bool isGameActive;
     private bool isBetweenWaves;
@@ -32,6 +34,8 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         if(numOfEnemies<=0 && !isBetweenWaves && isGameActive){
+            //needs to be a variable because it needs to be reset
+            StopCoroutine(countDownCoroutine);
             nextWaveScreen.SetActive(true);
             isBetweenWaves = true;
             wave++;
@@ -57,8 +61,9 @@ public class GameManager : MonoBehaviour
         DestroyAllEnemies("Homing Cone");
         DestroyAllEnemies("Enemy Laser");
         DestroyAllEnemies("Laser");
-        endScreen.SetActive(true);
+        StopCoroutine(countDownCoroutine);
         CancelInvoke();
+        endScreen.SetActive(true);
     }
 
     public void ResetGame(){
@@ -119,6 +124,7 @@ public class GameManager : MonoBehaviour
             numOfEnemies = 6;
         }
         waveText.text = $"Wave: {wave}";
+        countDownCoroutine = StartCoroutine(CountDown());
     }
 
     void SpawnEnemies(int lowestEnemyRange, int highestEnemyRange, int numOfEnemiesToSpawn){
@@ -129,7 +135,6 @@ public class GameManager : MonoBehaviour
                 numOfShieldSpheres++;
                 if (numOfShieldSpheres > 1){
                     enemyToSpawn = enemies[2];
-                    Debug.Log("Converted");
                 }
             }
             if (enemyToSpawn.CompareTag("Sphere") || enemyToSpawn.CompareTag("Shield Sphere")){
@@ -154,5 +159,17 @@ public class GameManager : MonoBehaviour
         nextWaveScreen.SetActive(false);
         SpawnWave();
         isBetweenWaves = false;
+    }
+
+    IEnumerator CountDown(){
+        int timeLeft = 30;
+        timerText.text = $"Time: {timeLeft}";
+        for (int i=0;i<30;i++){
+            yield return new WaitForSeconds(1);
+            timeLeft--;
+            timerText.text = $"Time: {timeLeft}";
+        }
+        Destroy(GameObject.FindGameObjectWithTag("Player"));
+        EndGame();
     }
 }
