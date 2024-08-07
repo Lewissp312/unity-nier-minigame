@@ -14,10 +14,12 @@ public class GameManager : MonoBehaviour
     public GameObject endScreen; 
     public TextMeshProUGUI waveText;
     public TextMeshProUGUI timerText;
+    public TextMeshProUGUI highestWaveText;
+    public TextMeshProUGUI passedHighestWaveText;
     private Coroutine countDownCoroutine;
-    // private Vector3 posToSpawnOn;
     private bool isGameActive;
     private bool isBetweenWaves;
+    private bool hasPassedHighestWave;
     private int wave;
     private int numOfEnemies;
 
@@ -26,8 +28,14 @@ public class GameManager : MonoBehaviour
     {
         isGameActive = false;
         isBetweenWaves = false;
+        hasPassedHighestWave = false;
         numOfEnemies = 3;
-        wave = 1;
+        wave = 1;        
+        if (!PlayerPrefs.HasKey("highestWave")){
+            PlayerPrefs.SetInt("highestWave",1);
+            PlayerPrefs.Save();
+        }
+        highestWaveText.text = $"Highest Wave: {PlayerPrefs.GetInt("highestWave")}";
     }
 
     // Update is called once per frame
@@ -64,6 +72,9 @@ public class GameManager : MonoBehaviour
         StopCoroutine(countDownCoroutine);
         CancelInvoke();
         endScreen.SetActive(true);
+        if (hasPassedHighestWave){
+            passedHighestWaveText.text = $"Highest Wave Passed! Highest Wave: {wave}";
+        }
     }
 
     public void ResetGame(){
@@ -124,6 +135,12 @@ public class GameManager : MonoBehaviour
             numOfEnemies = 6;
         }
         waveText.text = $"Wave: {wave}";
+        if (wave > PlayerPrefs.GetInt("highestWave")){
+            PlayerPrefs.SetInt("highestWave",wave);
+            PlayerPrefs.Save();
+            highestWaveText.text = $"Highest Wave: {wave}";
+            hasPassedHighestWave = true;
+        }
         countDownCoroutine = StartCoroutine(CountDown());
     }
 
