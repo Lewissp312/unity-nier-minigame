@@ -106,20 +106,29 @@ public class PlayerController : MonoBehaviour
             damageEffectCopy.Play();
             Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
             lives--;
-            Destroy(other.gameObject);
-        }
-        if (lives<=0){
-            gameManager.EndGame();
-            Destroy(gameObject);
+            if (lives<=0){
+                gameManager.EndGame();
+                Destroy(gameObject);
+            }
+            else{
+                Destroy(transform.GetChild(0).gameObject);
+                Destroy(other.gameObject);
+            }
         }
     }
 
     void OnCollisionEnter(Collision other){
         if (other.gameObject.CompareTag("Enemy Box")){
+            ParticleSystem damageEffectCopy = Instantiate(damageEffect,transform.position,transform.rotation);
+            damageEffectCopy.Play();
+            Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
             lives--;
             if (lives<=0){
                 gameManager.EndGame();
                 Destroy(gameObject);
+            }
+            else{
+                Destroy(transform.GetChild(0).gameObject);
             }
         }
     }
