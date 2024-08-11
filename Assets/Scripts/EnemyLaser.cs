@@ -8,6 +8,10 @@ public class EnemyLaser : MonoBehaviour
     public enum Direction{FORWARD,RIGHT,BACK,LEFT};
     public Direction selectedDirection;
     public Material orange;
+    public ParticleSystem destroyEffectPurple;
+    public ParticleSystem destroyEffectOrange;
+    private ParticleSystem destroyEffectCopy;
+
     private bool isOrange;
     // Start is called before the first frame update
     void Start()
@@ -48,7 +52,32 @@ public class EnemyLaser : MonoBehaviour
         if (collision.gameObject.CompareTag("Laser") && isOrange){
             Destroy(collision.gameObject);
             Destroy(gameObject);
+        }
+        if (collision.gameObject.CompareTag("Enemy Box")){
+            if (isOrange){
+                destroyEffectCopy = Instantiate(destroyEffectOrange,transform.position,transform.rotation);
+            }
+            else{
+                destroyEffectCopy = Instantiate(destroyEffectPurple,transform.position,transform.rotation);
+            }
+            destroyEffectCopy.Play();
+            Destroy(destroyEffectCopy.gameObject,destroyEffectCopy.main.duration);
+            Destroy(gameObject);
         }   
+    }
+
+    void OnTriggerEnter(Collider other){
+        // if (other.gameObject.CompareTag("Enemy Box")){
+        //     if (isOrange){
+        //         destroyEffectCopy = Instantiate(destroyEffectOrange,transform.position,transform.rotation);
+        //     }
+        //     else{
+        //         destroyEffectCopy = Instantiate(destroyEffectPurple,transform.position,transform.rotation);
+        //     }
+        //     destroyEffectCopy.Play();
+        //     Destroy(destroyEffectCopy.gameObject,destroyEffectCopy.main.duration);
+        //     Destroy(gameObject);
+        // }   
     }
 
 

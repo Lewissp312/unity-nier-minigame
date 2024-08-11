@@ -18,6 +18,9 @@ TagManager:
   - Cylinder
   - Shield Cylinder
   - Homing Cone
+  - Easy
+  - Medium
+  - Hard
   layers:
   - Default
   - TransparentFX

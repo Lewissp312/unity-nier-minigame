@@ -101,20 +101,6 @@ public class PlayerController : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Enemy Laser")){
-            ParticleSystem damageEffectCopy = Instantiate(damageEffect,transform.position,transform.rotation);
-            damageEffectCopy.Play();
-            Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
-            lives--;
-            if (lives<=0){
-                gameManager.EndGame();
-                Destroy(gameObject);
-            }
-            else{
-                Destroy(transform.GetChild(0).gameObject);
-                Destroy(other.gameObject);
-            }
-        }
     }
 
     void OnCollisionEnter(Collision other){
@@ -129,6 +115,20 @@ public class PlayerController : MonoBehaviour
             }
             else{
                 Destroy(transform.GetChild(0).gameObject);
+            }
+        }
+        if (other.gameObject.CompareTag("Enemy Laser")){
+            ParticleSystem damageEffectCopy = Instantiate(damageEffect,transform.position,transform.rotation);
+            damageEffectCopy.Play();
+            Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
+            lives--;
+            if (lives<=0){
+                gameManager.EndGame();
+                Destroy(gameObject);
+            }
+            else{
+                Destroy(transform.GetChild(0).gameObject);
+                Destroy(other.gameObject);
             }
         }
     }
