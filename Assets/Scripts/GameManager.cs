@@ -2,21 +2,31 @@ using System.Collections;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     public float xBound = 40;
     public float zBound = 40;
     public GameObject[] enemies;
+    public GameObject enemyBox;
     public GameObject startScreen;
     public GameObject nextWaveScreen;
     public GameObject endScreen; 
     public TextMeshProUGUI waveText;
     public TextMeshProUGUI timerText;
-    public TextMeshProUGUI highestWaveText;
+    public TextMeshProUGUI highestWaveEasyText;
+    public TextMeshProUGUI highestWaveMediumText;
+    public TextMeshProUGUI highestWaveHardText;
     public TextMeshProUGUI passedHighestWaveText;
+    public Button easyButton;
+    public Button mediumButton;
+    public Button hardButton;
     private Coroutine countDownCoroutine;
+    private enum Difficulties {EASY,MEDIUM,HARD};
+    private Difficulties selectedDifficulty;
     private bool isGameActive;
     private bool isBetweenWaves;
     private bool hasPassedHighestWave;
@@ -29,13 +39,24 @@ public class GameManager : MonoBehaviour
         isGameActive = false;
         isBetweenWaves = false;
         hasPassedHighestWave = false;
+        selectedDifficulty = Difficulties.MEDIUM;
         numOfEnemies = 3;
-        wave = 1;        
-        if (!PlayerPrefs.HasKey("highestWave")){
-            PlayerPrefs.SetInt("highestWave",1);
+        wave = 1;
+        if (!PlayerPrefs.HasKey("highestWaveEasy")){
+            PlayerPrefs.SetInt("highestWaveEasy",1);
             PlayerPrefs.Save();
         }
-        highestWaveText.text = $"Highest Wave: {PlayerPrefs.GetInt("highestWave")}";
+        if (!PlayerPrefs.HasKey("highestWaveMedium")){
+            PlayerPrefs.SetInt("highestWaveMedium",1);
+            PlayerPrefs.Save();
+        }
+        if (!PlayerPrefs.HasKey("highestWaveHard")){
+            PlayerPrefs.SetInt("highestWaveHard",1);
+            PlayerPrefs.Save();
+        }
+        highestWaveEasyText.text = $"Easy: {PlayerPrefs.GetInt("highestWaveEasy")}";
+        highestWaveMediumText.text = $"Medium: {PlayerPrefs.GetInt("highestWaveMedium")}";
+        highestWaveHardText.text = $"Hard: {PlayerPrefs.GetInt("highestWaveHard")}";
     }
 
     // Update is called once per frame
@@ -49,10 +70,55 @@ public class GameManager : MonoBehaviour
             wave++;
             StartCoroutine(WaitForNextWave());
         }
-        
+    }
+
+    public void SelectDifficulty(){
+        GameObject selectedButton = EventSystem.current.currentSelectedGameObject;
+        selectedButton.GetComponent<Image>().color = new Color32(127,122,103,255);
+        selectedButton.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
+        if (selectedButton.CompareTag("Easy")){
+            selectedDifficulty = Difficulties.EASY;
+            SetInactiveButtonColour(mediumButton);
+            SetInactiveButtonColour(hardButton);
+        }
+        else if (selectedButton.CompareTag("Medium")){
+            selectedDifficulty = Difficulties.MEDIUM;
+            SetInactiveButtonColour(easyButton);
+            SetInactiveButtonColour(hardButton);
+        }
+        else{
+            selectedDifficulty = Difficulties.HARD;
+            SetInactiveButtonColour(easyButton);
+            SetInactiveButtonColour(mediumButton);
+        }
     }
 
     public void StartGame(){
+// //centre bottom left, 3
+//         new Vector3(10.0900002f,-0.119999997f,-0.100000001f),
+//         //centre bottom right, 4
+//         new Vector3(-10.0100002f,-0.119999997f,-0.0700000003f),
+//         //centre top right, 5
+//         new Vector3(-10.0100002f,-0.119999997f,-10.2f),
+//         //centre top left, 6
+//         new Vector3(10.0900002f,-0.119999997f,-10.5200005f),
+        if (selectedDifficulty == Difficulties.HARD){
+            // //top left
+            // new Vector3(11.1999998,0.0199999996,-10.3000002);
+            // //top right
+            // Vector3(-8.19999981,0.0199999996,-10.3000002);
+            // //bottom right
+            // Vector3(-8.19999981,0.0199999996,7.4000001);
+            // //bottom left
+            // Vector3(11.3000002,0.0199999996,7.4000001);
+            // //centre
+            // Vector3(1.39999998,0.0199999996,-1)
+            Instantiate(enemyBox,new Vector3(11.1999998f,0.0199999996f,-10.3000002f),enemyBox.transform.rotation);
+            Instantiate(enemyBox,new Vector3(-8.19999981f,0.0199999996f,-10.3000002f),enemyBox.transform.rotation);
+            Instantiate(enemyBox,new Vector3(-8.19999981f,0.0199999996f,7.4000001f),enemyBox.transform.rotation);
+            Instantiate(enemyBox,new Vector3(11.3000002f,0.0199999996f,7.4000001f),enemyBox.transform.rotation);
+            Instantiate(enemyBox,new Vector3(1.39999998f,0.0199999996f,-1f),enemyBox.transform.rotation);
+        }
         isGameActive = true;
         startScreen.SetActive(false);
         nextWaveScreen.SetActive(true);
@@ -69,11 +135,13 @@ public class GameManager : MonoBehaviour
         DestroyAllEnemies("Homing Cone");
         DestroyAllEnemies("Enemy Laser");
         DestroyAllEnemies("Laser");
-        StopCoroutine(countDownCoroutine);
+        StopAllCoroutines();
+        // StopCoroutine(countDownCoroutine);
         CancelInvoke();
+        nextWaveScreen.SetActive(false);
         endScreen.SetActive(true);
         if (hasPassedHighestWave){
-            passedHighestWaveText.text = $"Highest Wave Passed! Highest Wave: {wave}";
+            passedHighestWaveText.text = $"Highest Wave Passed! Highest Wave ({selectedDifficulty.ToString().ToLower()}): {wave}";
         }
     }
 
@@ -109,39 +177,74 @@ public class GameManager : MonoBehaviour
         return numOfEnemies;
     }
 
+    void SetInactiveButtonColour(Button button){
+        button.GetComponent<Image>().color = new Color32(255,255,255,255);
+        button.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().color = new Color32(0,0,0,255);
+    }
+
     void SpawnWave(){
-        if (wave<4){ //wave 1,2,3
-            SpawnEnemies(0,2,3);
-            numOfEnemies = 3;
-        }
-        else if(wave<7){ //wave 4,5,6
-            SpawnEnemies(0,2,6);
-            numOfEnemies = 6;
-        }
-        else if(wave<10){ //wave 7,8,9
-            SpawnEnemies(2,5,3);
-            numOfEnemies = 3;
-        }
-        else if(wave<13){ //wave 10,11,12
-            SpawnEnemies(2,5,6);
-            numOfEnemies = 6;
-        }
-        else if(wave<16){ //wave 13,14,15
-            SpawnEnemies(0,5,3);
-            numOfEnemies = 3;
-        }
-        else if(wave>=16){ //waves beyond
-            SpawnEnemies(0,5,6);
-            numOfEnemies = 6;
+        switch(selectedDifficulty){
+            case Difficulties.EASY:
+                if (wave<4){ //wave 1,2,3
+                    SpawnEnemies(0,2,3);
+                    numOfEnemies = 3;
+                }
+                else if(wave<7){ //wave 7,8,9
+                    SpawnEnemies(2,5,3);
+                    numOfEnemies = 3;
+                }
+                else if(wave>=7){ //wave 13,14,15
+                    SpawnEnemies(0,5,3);
+                    numOfEnemies = 3;
+                }
+                CheckHighestWave("highestWaveEasy",highestWaveEasyText,"Easy");
+                break;
+            case Difficulties.MEDIUM or Difficulties.HARD:
+                if (wave<4){ //wave 1,2,3
+                    SpawnEnemies(0,2,3);
+                    numOfEnemies = 3;
+                }
+                else if(wave<7){ //wave 4,5,6
+                    SpawnEnemies(0,2,6);
+                    numOfEnemies = 6;
+                }
+                else if(wave<10){ //wave 7,8,9
+                    SpawnEnemies(2,5,3);
+                    numOfEnemies = 3;
+                }
+                else if(wave<13){ //wave 10,11,12
+                    SpawnEnemies(2,5,6);
+                    numOfEnemies = 6;
+                }
+                else if(wave<16){ //wave 13,14,15
+                    SpawnEnemies(0,5,3);
+                    numOfEnemies = 3;
+                }
+                else if(wave>=16){ //waves beyond
+                    SpawnEnemies(0,5,6);
+                    numOfEnemies = 6;
+                }
+                switch(selectedDifficulty){
+                    case Difficulties.MEDIUM:
+                        CheckHighestWave("highestWaveMedium",highestWaveMediumText,"Medium");
+                        break;
+                    case Difficulties.HARD:
+                        CheckHighestWave("highestWaveHard",highestWaveHardText,"Hard");
+                        break;
+                }
+                break;
         }
         waveText.text = $"Wave: {wave}";
-        if (wave > PlayerPrefs.GetInt("highestWave")){
-            PlayerPrefs.SetInt("highestWave",wave);
+        countDownCoroutine = StartCoroutine(CountDown());
+    }
+
+    void CheckHighestWave(string waveToExamine, TextMeshProUGUI textToChange, string textForWave){
+        if (wave > PlayerPrefs.GetInt(waveToExamine)){
+            PlayerPrefs.SetInt(waveToExamine,wave);
             PlayerPrefs.Save();
-            highestWaveText.text = $"Highest Wave: {wave}";
+            textToChange.text = $"{textForWave}: {wave}";
             hasPassedHighestWave = true;
         }
-        countDownCoroutine = StartCoroutine(CountDown());
     }
 
     void SpawnEnemies(int lowestEnemyRange, int highestEnemyRange, int numOfEnemiesToSpawn){
