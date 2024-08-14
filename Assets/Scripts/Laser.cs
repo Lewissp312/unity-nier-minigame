@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class Laser : MonoBehaviour
 {
-    public ParticleSystem destroyEffect;
+    [SerializeField] private ParticleSystem destroyEffect;
     private Vector3 fireDirection;
-    private float speed = 25;
+    private readonly float speed = 25;
     private GameManager gameManager;
     // Start is called before the first frame update
     void Start()

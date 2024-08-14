@@ -3,13 +3,13 @@ using UnityEngine;
 
 public class EnemyLaser : MonoBehaviour
 {
-    private float speed = 10f;
-    private GameManager gameManager;
     public enum Direction{FORWARD,RIGHT,BACK,LEFT};
-    public Direction selectedDirection;
-    public Material orange;
-    public ParticleSystem destroyEffectPurple;
-    public ParticleSystem destroyEffectOrange;
+    [SerializeField] private Material orange;
+    [SerializeField] private ParticleSystem destroyEffectPurple;
+    [SerializeField] private ParticleSystem destroyEffectOrange;
+    private Direction selectedDirection;
+    private readonly float speed = 10f;
+    private GameManager gameManager;
     private ParticleSystem destroyEffectCopy;
 
     private bool isOrange;
@@ -18,12 +18,19 @@ public class EnemyLaser : MonoBehaviour
     {
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
         int randNum = Random.Range(1,21);
-        if (randNum%5==0){
-            GetComponent<MeshRenderer> ().material = orange;
-            isOrange = true;
+        //if the number is modularly divided by 3, make it purple for the 5th wave, otherwise it's orange. Just the inverse really
+        if (randNum%3==0){
+            //if the wave is not a special wave or the game mode is easy
+            if (gameManager.GetWave()%5 != 0 || gameManager.GetDifficulty() == GameManager.Difficulties.EASY){
+                GetComponent<MeshRenderer>().material = orange;
+                isOrange = true;
+            }
         }
         else{
-            isOrange = false;
+            if (gameManager.GetWave()%5 == 0 && gameManager.GetDifficulty() != GameManager.Difficulties.EASY){
+                GetComponent<MeshRenderer> ().material = orange;
+                isOrange = true;
+            }
         }
     }
 
@@ -66,18 +73,8 @@ public class EnemyLaser : MonoBehaviour
         }   
     }
 
-    void OnTriggerEnter(Collider other){
-        // if (other.gameObject.CompareTag("Enemy Box")){
-        //     if (isOrange){
-        //         destroyEffectCopy = Instantiate(destroyEffectOrange,transform.position,transform.rotation);
-        //     }
-        //     else{
-        //         destroyEffectCopy = Instantiate(destroyEffectPurple,transform.position,transform.rotation);
-        //     }
-        //     destroyEffectCopy.Play();
-        //     Destroy(destroyEffectCopy.gameObject,destroyEffectCopy.main.duration);
-        //     Destroy(gameObject);
-        // }   
+    public void SetSelectedDirection(Direction direction){
+        selectedDirection = direction;
     }
 
 
