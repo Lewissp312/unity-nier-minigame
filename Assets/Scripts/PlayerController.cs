@@ -4,22 +4,21 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] private GameObject laser;
+    [SerializeField] private ParticleSystem damageEffect;
+    [SerializeField] private LayerMask layersToHit;
     private int lives = 3;
-    private float speed = 15;
-    private float xBoundRight = -16.5f;
-    private float xBoundLeft = 20.5f;
-    private float zBoundDown = 15.7f;
-    private float zBoundUp = -21.3f;
+    private readonly float speed = 15;
+    private readonly float xBoundRight = -16.5f;
+    private readonly float xBoundLeft = 20.5f;
+    private readonly float zBoundDown = 15.7f;
+    private readonly float zBoundUp = -21.3f;
     private Vector3 laserPosition;
     private Vector3 stickDirection;
     private Quaternion laserRotation;
     private bool canShoot = true;
     private GameManager gameManager;
     private string[] controllers;
-    public GameObject laser;
-    public ParticleSystem damageEffect;
-    public LayerMask layersToHit;
-    // public GameObject camera;
 
     // Start is called before the first frame update
     void Start()
