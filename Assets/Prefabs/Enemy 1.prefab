@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5040824994119780361}
   - component: {fileID: 7621553414792472916}
   - component: {fileID: 6095520955156485464}
+  - component: {fileID: -9017614579760593981}
   m_Layer: 0
   m_Name: Enemy 1
   m_TagString: Cylinder
@@ -93,7 +94,7 @@ CapsuleCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2094563081060282894}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.5000001
   m_Height: 2
@@ -114,3 +115,16 @@ MonoBehaviour:
   enemyLaser: {fileID: 4185834950684278263, guid: 861c24a6763e04aff8f93ec5898c4cc1, type: 3}
   damageEffect: {fileID: 2257364063208976271, guid: 7eda49dc1597b4fa1aab429aebe3c4a8, type: 3}
   isMovingEnemy: 0
+--- !u!65 &-9017614579760593981
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2094563081060282894}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 1.0000001, y: 2, z: 1.0000002}
+  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
