@@ -11,7 +11,6 @@ public class Enemy : MonoBehaviour
     private int lives = 10;
     private Vector3 posToMoveTo;
     private bool isShieldDestroyed;
-    // private bool isShootingLasers;
     private GameManager gameManager;
     // Start is called before the first frame update
     void Start()
@@ -63,10 +62,6 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // public void SetIsShootingLasers(bool isShootingLasers){
-    //     this.isShootingLasers = isShootingLasers;
-    // }
-
     void ShootLasers(){
         GameObject upLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
         upLaser.GetComponent<EnemyLaser>().SetSelectedDirection(EnemyLaser.Direction.FORWARD);
@@ -82,7 +77,6 @@ public class Enemy : MonoBehaviour
 
     void ChangeEnemyPosition(){
         posToMoveTo = new Vector3(Random.Range(-16.5f,20.6f),-0.119999997f,Random.Range(-21.3f,15.8f));
-        // randEnemy1Position = Random.Range(0,9);
     }
 
     void OnCollisionEnter(Collision collision)

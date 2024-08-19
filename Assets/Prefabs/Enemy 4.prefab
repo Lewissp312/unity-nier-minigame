@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6444378227166777918}
   - component: {fileID: 4540302745721172151}
   - component: {fileID: 756714503109875928}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Enemy 4
   m_TagString: Shield Sphere
   m_Icon: {fileID: 0}

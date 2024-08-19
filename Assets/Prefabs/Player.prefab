@@ -13,7 +13,8 @@ GameObject:
   - component: {fileID: 7474571548051670373}
   - component: {fileID: 877893512399354426}
   - component: {fileID: 877893512399354427}
-  - component: {fileID: 877893512399354428}
+  - component: {fileID: -2252287466493391388}
+  - component: {fileID: -8203201492544806726}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -30,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 877893512399354425}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 1.6, y: 0.02, z: 15.64}
-  m_LocalScale: {x: 100, y: 99.999985, z: 99.999985}
+  m_LocalScale: {x: 100, y: 99.99998, z: 99.999985}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7020083762557830498}
@@ -119,9 +120,23 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 0
+  m_Constraints: 126
   m_CollisionDetection: 1
---- !u!65 &877893512399354428
+--- !u!136 &-2252287466493391388
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 877893512399354425}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  m_Radius: 0.008472889
+  m_Height: 0.021571053
+  m_Direction: 2
+  m_Center: {x: 0, y: -0.0017235546, z: -0.00061566127}
+--- !u!65 &-8203201492544806726
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

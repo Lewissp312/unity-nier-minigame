@@ -21,11 +21,12 @@ TagManager:
   - Easy
   - Medium
   - Hard
+  - Spiral Sphere
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Invisible
   - Water
   - UI
   - 

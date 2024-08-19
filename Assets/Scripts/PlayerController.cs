@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 stickDirection;
     private Quaternion laserRotation;
     private bool canShoot = true;
+    private bool hasTouchedEnemyBox = false;
     private GameManager gameManager;
     private string[] controllers;
 
@@ -63,22 +64,6 @@ public class PlayerController : MonoBehaviour
         return transform.position;
     }
 
-    public float GetXBoundRight(){
-        return this.xBoundRight;
-    }
-
-    public float GetXBoundLeft(){
-        return this.xBoundLeft;
-    }
-
-    public float GetZBoundDown(){
-        return this.zBoundDown;
-    }
-
-    public float GetZBoundUp(){
-        return this.zBoundUp;
-    }
-
     void MovementRestrictions(){
         if (transform.position.x < xBoundRight ){
             transform.position = new Vector3(xBoundRight,transform.position.y,transform.position.z);
@@ -98,12 +83,10 @@ public class PlayerController : MonoBehaviour
         canShoot = true;
     }
 
-    void OnTriggerEnter(Collider other)
-    {
-    }
-
     void OnCollisionEnter(Collision other){
-        if (other.gameObject.CompareTag("Enemy Box")){
+        if (other.gameObject.CompareTag("Enemy Box") && !hasTouchedEnemyBox){
+            canShoot = false;
+            hasTouchedEnemyBox = true;
             ParticleSystem damageEffectCopy = Instantiate(damageEffect,transform.position,transform.rotation);
             damageEffectCopy.Play();
             Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
@@ -131,4 +114,17 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
+    void OnCollisionExit(Collision other)
+    {
+        if (other.gameObject.CompareTag("Enemy Box")){
+            hasTouchedEnemyBox = false;
+            canShoot = true;
+        }
+    }
+
+    // IEnumerator BoxDamageGracePeriod(){
+    //     yield return new WaitForSeconds(1);
+    //     hasTouchedEnemyBox = false;
+    // }
 }
