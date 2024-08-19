@@ -405,14 +405,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99c98c180ca7c403982f62224bd6345a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xBound: 40
-  zBound: 40
   enemies:
   - {fileID: 2094563081060282894, guid: 344d004076b6047dfa3e6eadbde926f4, type: 3}
   - {fileID: 8968886037132292301, guid: 877162dc2e5ad47ce88355c6e48316df, type: 3}
   - {fileID: 3124055450685024675, guid: 5d7c0494c08934552bfac7b758506ab8, type: 3}
   - {fileID: 2004729340371040601, guid: efa3bf74e44334de58baf5d2c99d4741, type: 3}
   - {fileID: 833030170272143277, guid: c2af5ddc389ec4ffa8bb74c235de1c0b, type: 3}
+  - {fileID: 3124055450685024675, guid: 31a8423ecb50b43e3b5901bd668bda0e, type: 3}
   enemyBox: {fileID: 2106270714274624482, guid: 8e053a3b1a2c84a6d8de0db89eca784d, type: 3}
   startScreen: {fileID: 2113591385}
   nextWaveScreen: {fileID: 2049261843}
@@ -3230,10 +3229,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 877893512399354427, guid: 27105267be44544248f1f18ef6817792, type: 3}
-      propertyPath: m_Constraints
-      value: 126
-      objectReference: {fileID: 0}
     - target: {fileID: 7148181077249830292, guid: 27105267be44544248f1f18ef6817792, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -3685,7 +3680,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 91, y: -73.8}
+  m_AnchoredPosition: {x: 74.39, y: -73.8}
   m_SizeDelta: {x: 842.14, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1864210819

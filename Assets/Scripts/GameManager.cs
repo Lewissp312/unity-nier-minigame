@@ -1,3 +1,4 @@
+// using System;
 using System.Collections;
 using TMPro;
 using Unity.VisualScripting;
@@ -39,7 +40,7 @@ public class GameManager : MonoBehaviour
         hasPassedHighestWave = false;
         selectedDifficulty = Difficulties.MEDIUM;
         numOfEnemies = 3;
-        wave = 5;
+        wave = 1;
         if (!PlayerPrefs.HasKey("highestWaveEasy")){
             PlayerPrefs.SetInt("highestWaveEasy",1);
             PlayerPrefs.Save();
@@ -98,10 +99,10 @@ public class GameManager : MonoBehaviour
             Instantiate(enemyBox,new Vector3(11.1999998f,0.0199999996f,-10.3000002f),enemyBox.transform.rotation);
             //top right
             Instantiate(enemyBox,new Vector3(-8.19999981f,0.0199999996f,-10.3000002f),enemyBox.transform.rotation);
-            //bottom right
-            Instantiate(enemyBox,new Vector3(-8.19999981f,0.0199999996f,7.4000001f),enemyBox.transform.rotation);
             //bottom left
             Instantiate(enemyBox,new Vector3(11.3000002f,0.0199999996f,7.4000001f),enemyBox.transform.rotation);
+            //bottom right
+            Instantiate(enemyBox,new Vector3(-8.19999981f,0.0199999996f,7.4000001f),enemyBox.transform.rotation);
             //centre
             Instantiate(enemyBox,new Vector3(1.39999998f,0.0199999996f,-1f),enemyBox.transform.rotation);
         }
@@ -232,7 +233,28 @@ public class GameManager : MonoBehaviour
                     enemyToSpawn = enemies[2];
                 }
             }
-            Vector3 posToSpawnOn = new(Random.Range(-16.5f,20.6f),-0.119999997f,Random.Range(-21.3f,15.8f));
+            bool isGoodSpawn = false;
+            Vector3 posToSpawnOn;
+            do{
+                posToSpawnOn = new(Random.Range(-16.5f,20.6f),-0.119999997f,Random.Range(-21.3f,15.8f));
+                Vector3 boxSize;
+                try{
+                    boxSize = enemyToSpawn.GetComponent<BoxCollider>().size;
+                } catch (System.Exception){
+                    enemyToSpawn.AddComponent<BoxCollider>();
+                    boxSize = enemyToSpawn.GetComponent<BoxCollider>().size;
+                    enemyToSpawn.GetComponent<BoxCollider>().enabled = false;
+                }
+                Collider[] hitColliders = Physics.OverlapBox(posToSpawnOn, boxSize / 2, enemyToSpawn.transform.rotation);
+                if (hitColliders.Length > 0){
+                    if (hitColliders[0].CompareTag("Ground")){
+                        isGoodSpawn = true;
+                    }
+                }
+                else{
+                    isGoodSpawn = true;
+                }
+            } while(!isGoodSpawn);
             Instantiate(enemyToSpawn,posToSpawnOn,enemyToSpawn.transform.rotation);
         } 
     }
