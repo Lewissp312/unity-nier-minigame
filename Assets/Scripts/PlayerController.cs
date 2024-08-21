@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 laserPosition;
     private Vector3 stickDirection;
     private Quaternion laserRotation;
+    private Rigidbody rb;
     private bool canShoot = true;
     private bool hasTouchedEnemyBox = false;
     private GameManager gameManager;
@@ -24,22 +25,26 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //cubeRigidbody = GetComponent<Rigidbody>();
         controllers = Input.GetJoystickNames();
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
+        rb = GetComponent<Rigidbody>();
+    }
+
+    void FixedUpdate(){
+        if (gameManager.GetIsGameActive()){
+            float horizontalMovement = Input.GetAxis("Horizontal");
+            float verticalMovement = Input.GetAxis("Vertical");
+            float rightStickHorizontal = Input.GetAxis("RightStickHorizontal");
+            float rightStickVertical = Input.GetAxis("RightStickVertical");
+            Vector3 movement = new(-horizontalMovement, 0.0f, -verticalMovement);
+            rb.MovePosition(rb.position + speed * Time.fixedDeltaTime * movement);
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
         if (gameManager.GetIsGameActive()){
-            transform.position = new Vector3(transform.position.x,0.02f,transform.position.z);
-            float horizontalMovement = Input.GetAxis("Horizontal");
-            float verticalMovement = Input.GetAxis("Vertical");
-            float rightStickHorizontal = Input.GetAxis("RightStickHorizontal");
-            float rightStickVertical = Input.GetAxis("RightStickVertical");
-            transform.Translate(horizontalMovement * speed * Time.deltaTime * Vector3.left,Space.World);
-            transform.Translate(verticalMovement * speed * Time.deltaTime * Vector3.back,Space.World);
             MovementRestrictions();
             if ((Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2) || Input.GetKey(KeyCode.JoystickButton5)) && canShoot){
                 laserPosition = (transform.forward * 2) + transform.position;
@@ -50,12 +55,6 @@ public class PlayerController : MonoBehaviour
             if (controllers.Length == 0){
                 transform.LookAt(gameManager.GetMouseOnBoardPosition());
             }
-            else{
-                if (!(rightStickHorizontal > -0.9f && rightStickHorizontal < 0.9f)){
-                    Debug.Log(rightStickHorizontal);
-                    transform.Rotate(0,rightStickHorizontal,0);
-                }
-            }
         }
         
     }
@@ -65,16 +64,18 @@ public class PlayerController : MonoBehaviour
     }
 
     void MovementRestrictions(){
-        if (transform.position.x < xBoundRight ){
-            transform.position = new Vector3(xBoundRight,transform.position.y,transform.position.z);
-        } else if(transform.position.x > xBoundLeft){
-            transform.position = new Vector3(xBoundLeft,transform.position.y,transform.position.z);
+        Vector3 newPosition = rb.position;
+        if (newPosition.x < xBoundRight ){
+            newPosition.x = xBoundRight;
+        } else if(newPosition.x > xBoundLeft){
+            newPosition.x = xBoundLeft;
         }
-        if (transform.position.z > zBoundDown){
-            transform.position = new Vector3(transform.position.x,transform.position.y,zBoundDown);
-        } else if(transform.position.z < zBoundUp){
-            transform.position = new Vector3(transform.position.x,transform.position.y,zBoundUp);
+        if (newPosition.z > zBoundDown ){
+            newPosition.z = zBoundDown;
+        } else if(newPosition.z < zBoundUp){
+            newPosition.z = zBoundUp;
         }
+        rb.MovePosition(newPosition);
     }
 
     IEnumerator WaitToShoot(){
@@ -120,11 +121,15 @@ public class PlayerController : MonoBehaviour
         if (other.gameObject.CompareTag("Enemy Box")){
             hasTouchedEnemyBox = false;
             canShoot = true;
+            rb.velocity = Vector3.zero;
         }
     }
 
-    // IEnumerator BoxDamageGracePeriod(){
-    //     yield return new WaitForSeconds(1);
-    //     hasTouchedEnemyBox = false;
-    // }
+    void OnCollisionStay(Collision other)
+    {
+        if (other.gameObject.CompareTag("Enemy Box")){
+            hasTouchedEnemyBox = true;
+            canShoot = false;
+        }
+    }
 }
