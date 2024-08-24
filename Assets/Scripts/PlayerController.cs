@@ -93,7 +93,7 @@ public class PlayerController : MonoBehaviour
             Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
             lives--;
             if (lives<=0){
-                gameManager.EndGame();
+                gameManager.EndGame("Enemy Box");
                 Destroy(gameObject);
             }
             else{
@@ -106,7 +106,7 @@ public class PlayerController : MonoBehaviour
             Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
             lives--;
             if (lives<=0){
-                gameManager.EndGame();
+                gameManager.EndGame(other.gameObject.GetComponent<EnemyLaser>().GetEnemyTag());
                 Destroy(gameObject);
             }
             else{

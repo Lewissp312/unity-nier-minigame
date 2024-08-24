@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ public class EnemyLaser : MonoBehaviour
     private readonly float speed = 10f;
     private GameManager gameManager;
     private ParticleSystem destroyEffectCopy;
+    private string enemyTag;
 
     private bool isOrange;
     // Start is called before the first frame update
@@ -50,7 +52,7 @@ public class EnemyLaser : MonoBehaviour
             case Direction.LEFT:
                 transform.Translate(speed * Time.deltaTime * Vector3.left);
                 break;
-        } 
+        }
         gameManager.MovementRestrictions(gameObject);
     }
 
@@ -77,5 +79,11 @@ public class EnemyLaser : MonoBehaviour
         selectedDirection = direction;
     }
 
+    public string GetEnemyTag(){
+        return enemyTag;
+    }
 
+    public void SetEnemyTag(string enemyTag){
+        this.enemyTag = enemyTag;
+    }
 }

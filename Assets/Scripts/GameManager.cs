@@ -1,5 +1,7 @@
 // using System;
 using System.Collections;
+using System.ComponentModel;
+using System.Reflection;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -20,6 +22,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI highestWaveEasyText;
     [SerializeField] private TextMeshProUGUI highestWaveMediumText;
     [SerializeField] private TextMeshProUGUI highestWaveHardText;
+    [SerializeField] private TextMeshProUGUI causeOfFailureText;
     [SerializeField] private TextMeshProUGUI passedHighestWaveText;
     [SerializeField] private Button easyButton;
     [SerializeField] private Button mediumButton;
@@ -35,9 +38,6 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        isGameActive = false;
-        isBetweenWaves = false;
-        hasPassedHighestWave = false;
         selectedDifficulty = Difficulties.MEDIUM;
         numOfEnemies = 3;
         wave = 1;
@@ -113,7 +113,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(WaitForNextWave());
     }
 
-    public void EndGame(){
+    public void EndGame(string causeOfFailure){
         isGameActive = false;
         DestroyAllEnemies("Cylinder");
         DestroyAllEnemies("Shield Cylinder");
@@ -127,6 +127,7 @@ public class GameManager : MonoBehaviour
         CancelInvoke();
         nextWaveScreen.SetActive(false);
         endScreen.SetActive(true);
+        causeOfFailureText.text = $"Cause of Failure: {causeOfFailure}";
         if (hasPassedHighestWave){
             passedHighestWaveText.text = $"Highest Wave Passed! Highest Wave ({selectedDifficulty.ToString().ToLower()}): {wave}";
         }
@@ -226,7 +227,8 @@ public class GameManager : MonoBehaviour
     void SpawnEnemies(int lowestEnemyRange, int highestEnemyRange, int numOfEnemiesToSpawn){
         int numOfShieldSpheres = 0;
         for(int i=0;i<numOfEnemiesToSpawn;i++){
-            GameObject enemyToSpawn = enemies[Random.Range(lowestEnemyRange,highestEnemyRange)];
+            int randEnemyIndex = Random.Range(lowestEnemyRange,highestEnemyRange);
+            GameObject enemyToSpawn = enemies[randEnemyIndex];
             if (enemyToSpawn.CompareTag("Shield Sphere")){
                 numOfShieldSpheres++;
                 if (numOfShieldSpheres > 1){
@@ -317,6 +319,6 @@ public class GameManager : MonoBehaviour
             timerText.text = $"Time: {timeLeft}";
         }
         Destroy(GameObject.FindGameObjectWithTag("Player"));
-        EndGame();
+        EndGame("Out of Time");
     }
 }

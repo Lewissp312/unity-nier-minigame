@@ -24,7 +24,6 @@ public class Enemy : MonoBehaviour
         }
         else{
             if (gameManager.GetWave()%5 != 0 || gameManager.GetDifficulty() == GameManager.Difficulties.EASY){
-
                 InvokeRepeating(nameof(ShootLasers),Random.Range(0,6),2f);
             }
         }
@@ -63,15 +62,23 @@ public class Enemy : MonoBehaviour
     }
 
     void ShootLasers(){
+        // Debug.Log($"Has been set: {hasBeenSet}");
         GameObject upLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
         upLaser.GetComponent<EnemyLaser>().SetSelectedDirection(EnemyLaser.Direction.FORWARD);
+        upLaser.GetComponent<EnemyLaser>().SetEnemyTag(gameObject.tag);
         if (!gameObject.CompareTag("Homing Cone")){
+
             GameObject rightLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
             rightLaser.GetComponent<EnemyLaser>().SetSelectedDirection(EnemyLaser.Direction.RIGHT);
+            rightLaser.GetComponent<EnemyLaser>().SetEnemyTag(gameObject.tag);
+
             GameObject backLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
             backLaser.GetComponent<EnemyLaser>().SetSelectedDirection(EnemyLaser.Direction.BACK);
+            backLaser.GetComponent<EnemyLaser>().SetEnemyTag(gameObject.tag);
+
             GameObject leftLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
             leftLaser.GetComponent<EnemyLaser>().SetSelectedDirection(EnemyLaser.Direction.LEFT);
+            leftLaser.GetComponent<EnemyLaser>().SetEnemyTag(gameObject.tag);
         }
     }
 
