@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour
             float rightStickVertical = Input.GetAxis("RightStickVertical");
             Vector3 movement = new(-horizontalMovement, 0.0f, -verticalMovement);
             rb.MovePosition(rb.position + speed * Time.fixedDeltaTime * movement);
+            rb.velocity = Vector3.zero;
         }
     }
 

@@ -26,11 +26,15 @@ public class Laser : MonoBehaviour
 
     void OnCollisionEnter(Collision other)
     {
+        Debug.Log(other.gameObject);
         if (other.gameObject.CompareTag("Enemy Box") || other.gameObject.CompareTag("Shield")){
             ParticleSystem destroyEffectCopy = Instantiate(destroyEffect,transform.position,transform.rotation);
             destroyEffectCopy.Play();
             Destroy(destroyEffectCopy.gameObject,destroyEffectCopy.main.duration);
             Destroy(gameObject);
+            Debug.Log("Shield hit");
         }
     }
 }
+
+//Vector3(2.15816331,2.15816331,2.15816331)

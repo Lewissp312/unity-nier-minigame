@@ -32,6 +32,7 @@ public class GameManager : MonoBehaviour
     private bool isGameActive;
     private bool isBetweenWaves;
     private bool hasPassedHighestWave;
+    private bool isSpiralWave;
     private int wave;
     private int numOfEnemies;
 
@@ -40,7 +41,7 @@ public class GameManager : MonoBehaviour
     {
         selectedDifficulty = Difficulties.MEDIUM;
         numOfEnemies = 3;
-        wave = 1;
+        wave = 5;
         if (!PlayerPrefs.HasKey("highestWaveEasy")){
             PlayerPrefs.SetInt("highestWaveEasy",1);
             PlayerPrefs.Save();
@@ -165,6 +166,7 @@ public class GameManager : MonoBehaviour
                 break;
             case Difficulties.MEDIUM or Difficulties.HARD:
                 if (wave%5==0){
+                    isSpiralWave = true;
                     GameObject spiralEnemy = enemies[5];
                     Instantiate(spiralEnemy,new Vector3(1.29999995f,-0.119999997f,-21f),enemies[5].transform.rotation);
                     GameObject cylinder1 = enemies[0];
@@ -176,6 +178,7 @@ public class GameManager : MonoBehaviour
                     numOfEnemies = 4;
                 }
                 else{
+                    isSpiralWave = false;
                     if (wave<4){ //wave 1,2,3
                         SpawnEnemies(0,2,3);
                         numOfEnemies = 3;
@@ -287,6 +290,10 @@ public class GameManager : MonoBehaviour
 
     public bool GetIsGameActive(){
         return isGameActive;
+    }
+
+    public bool GetIsSpiralWave(){
+        return isSpiralWave;
     }
 
     public int GetNumOfEnemies(){

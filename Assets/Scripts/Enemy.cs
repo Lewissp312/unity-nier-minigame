@@ -11,6 +11,7 @@ public class Enemy : MonoBehaviour
     private int lives = 10;
     private Vector3 posToMoveTo;
     private bool isShieldDestroyed;
+    private bool canHomeIn = true;
     private GameManager gameManager;
     // Start is called before the first frame update
     void Start()
@@ -23,8 +24,8 @@ public class Enemy : MonoBehaviour
             InvokeRepeating(nameof(ShootLasers),1,0.1f);
         }
         else{
-            if (gameManager.GetWave()%5 != 0 || gameManager.GetDifficulty() == GameManager.Difficulties.EASY){
-                InvokeRepeating(nameof(ShootLasers),Random.Range(0,6),2f);
+            if (!gameManager.GetIsSpiralWave()){
+                InvokeRepeating(nameof(ShootLasers),Random.Range(0,3.5f),2f);
             }
         }
         if (isMovingEnemy){
@@ -42,7 +43,9 @@ public class Enemy : MonoBehaviour
             }
             else if (gameObject.CompareTag("Homing Cone")){
                 transform.LookAt(playerController.GetPlayerPosition());
-                transform.position = Vector3.MoveTowards(transform.position,playerController.GetPlayerPosition(),2*Time.deltaTime);
+                if (canHomeIn){
+                    transform.position = Vector3.MoveTowards(transform.position,playerController.GetPlayerPosition(),2*Time.deltaTime);
+                }
             }
             else if (gameObject.CompareTag("Spiral Sphere")){
                     transform.Rotate(0,20*Time.deltaTime,0);
@@ -62,7 +65,6 @@ public class Enemy : MonoBehaviour
     }
 
     void ShootLasers(){
-        // Debug.Log($"Has been set: {hasBeenSet}");
         GameObject upLaser = Instantiate(enemyLaser, transform.position, transform.rotation);
         upLaser.GetComponent<EnemyLaser>().SetSelectedDirection(EnemyLaser.Direction.FORWARD);
         upLaser.GetComponent<EnemyLaser>().SetEnemyTag(gameObject.tag);
@@ -98,6 +100,15 @@ public class Enemy : MonoBehaviour
                 gameManager.DecreaseNumOfEnemies();
                 Destroy(gameObject);
             }
+        }
+        if (collision.gameObject.CompareTag("Player") && gameObject.CompareTag("Homing Cone")){
+            canHomeIn = false;
         }   
+    }
+
+    void OnCollisionExit(Collision other){
+        if (other.gameObject.CompareTag("Player") && gameObject.CompareTag("Homing Cone")){
+            canHomeIn = true;
+        }    
     }
 }
