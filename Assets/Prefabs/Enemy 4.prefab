@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4540302745721172151}
   - component: {fileID: 756714503109875928}
   - component: {fileID: -4712623407078453139}
-  - component: {fileID: 5051886665438174387}
+  - component: {fileID: 1705018676}
   m_Layer: 1
   m_Name: Enemy 4
   m_TagString: Shield Sphere
@@ -129,7 +129,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &5051886665438174387
+--- !u!54 &1705018676
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -237,7 +237,7 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9098432262086442456}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
