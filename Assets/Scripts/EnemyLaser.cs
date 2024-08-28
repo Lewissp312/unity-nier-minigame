@@ -23,13 +23,13 @@ public class EnemyLaser : MonoBehaviour
         //if the number is modularly divided by 3, make it purple for the 5th wave, otherwise it's orange. Just the inverse really
         if (randNum%3==0){
             //if the wave is not a special wave or the game mode is easy
-            if (gameManager.GetWave()%5 != 0 || gameManager.GetDifficulty() == GameManager.Difficulties.EASY){
+            if (!gameManager.GetIsSpiralWave()){
                 GetComponent<MeshRenderer>().material = orange;
                 isOrange = true;
             }
         }
         else{
-            if (gameManager.GetWave()%5 == 0 && gameManager.GetDifficulty() != GameManager.Difficulties.EASY){
+            if (gameManager.GetIsSpiralWave()){
                 GetComponent<MeshRenderer> ().material = orange;
                 isOrange = true;
             }

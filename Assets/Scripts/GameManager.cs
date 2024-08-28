@@ -1,11 +1,8 @@
 // using System;
 using System.Collections;
-using System.ComponentModel;
-using System.Reflection;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -27,29 +24,33 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button easyButton;
     [SerializeField] private Button mediumButton;
     [SerializeField] private Button hardButton;
+    private PlayerController playerController;
     private Difficulties selectedDifficulty;
     private Coroutine countDownCoroutine;
+    private Vector3 lastGoodMousePos;
     private bool isGameActive;
     private bool isBetweenWaves;
     private bool hasPassedHighestWave;
+    private bool isSpiralWave;
     private int wave;
     private int numOfEnemies;
 
     // Start is called before the first frame update
     void Start()
     {
+        playerController = GameObject.Find("Player").GetComponent<PlayerController>();
         selectedDifficulty = Difficulties.MEDIUM;
         numOfEnemies = 3;
         wave = 1;
-        if (!PlayerPrefs.HasKey("highestWaveEasy")){
+        if(!PlayerPrefs.HasKey("highestWaveEasy")){
             PlayerPrefs.SetInt("highestWaveEasy",1);
             PlayerPrefs.Save();
         }
-        if (!PlayerPrefs.HasKey("highestWaveMedium")){
+        if(!PlayerPrefs.HasKey("highestWaveMedium")){
             PlayerPrefs.SetInt("highestWaveMedium",1);
             PlayerPrefs.Save();
         }
-        if (!PlayerPrefs.HasKey("highestWaveHard")){
+        if(!PlayerPrefs.HasKey("highestWaveHard")){
             PlayerPrefs.SetInt("highestWaveHard",1);
             PlayerPrefs.Save();
         }
@@ -61,8 +62,48 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(startScreen.activeSelf){
+            if(GetIsUsingController()){
+                startScreen.transform.GetChild(0).gameObject.SetActive(true);
+                startScreen.transform.GetChild(1).gameObject.GetComponent<TextMeshProUGUI>().text = 
+                "Use the left stick to move. Move the right stick to change your firing direction. Hold R1/RB to fire.";
+                //square / X
+                if(Input.GetKeyDown(KeyCode.JoystickButton0)){
+                    SelectDifficulty(0);
+                }
+                //triangle / Y
+                else if(Input.GetKeyDown(KeyCode.JoystickButton3)){
+                    SelectDifficulty(1);
+                }
+                //circle / B
+                else if(Input.GetKeyDown(KeyCode.JoystickButton2)){
+                    SelectDifficulty(2);
+                }
+                //X / A
+                else if(Input.GetKeyDown(KeyCode.JoystickButton1)){
+                    StartGame();
+                }
+            }
+            else{
+                startScreen.transform.GetChild(0).gameObject.SetActive(false);
+                startScreen.transform.GetChild(1).gameObject.GetComponent<TextMeshProUGUI>().text = 
+                "Use WASD to move. Move the mouse to change your firing direction. Hold right or left click to fire.";
+            }
+        }
+        else if(endScreen.activeSelf){
+            if(GetIsUsingController()){
+                endScreen.transform.GetChild(0).gameObject.SetActive(true);
+                // X / A
+                if(Input.GetKeyDown(KeyCode.JoystickButton1)){
+                    ResetGame();
+                }
+            }
+            else{
+                endScreen.transform.GetChild(0).gameObject.SetActive(false);
+            }
+        }
         if(numOfEnemies<=0 && !isBetweenWaves && isGameActive){
-            DestroyAllEnemies("Enemy Laser");
+            DestroyAllClones("Enemy Laser");
             //needs to be a variable because it needs to be reset
             StopCoroutine(countDownCoroutine);
             nextWaveScreen.SetActive(true);
@@ -72,29 +113,31 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void SelectDifficulty(){
-        GameObject selectedButton = EventSystem.current.currentSelectedGameObject;
-        selectedButton.GetComponent<Image>().color = new Color32(127,122,103,255);
-        selectedButton.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
-        if (selectedButton.CompareTag("Easy")){
-            selectedDifficulty = Difficulties.EASY;
-            SetInactiveButtonColour(mediumButton);
-            SetInactiveButtonColour(hardButton);
-        }
-        else if (selectedButton.CompareTag("Medium")){
-            selectedDifficulty = Difficulties.MEDIUM;
-            SetInactiveButtonColour(easyButton);
-            SetInactiveButtonColour(hardButton);
-        }
-        else{
-            selectedDifficulty = Difficulties.HARD;
-            SetInactiveButtonColour(easyButton);
-            SetInactiveButtonColour(mediumButton);
+    public void SelectDifficulty(int selectedOption){
+        switch(selectedOption){
+            case 0:
+                SetActiveButtonColour(easyButton.gameObject);
+                selectedDifficulty = Difficulties.EASY;
+                SetInactiveButtonColour(mediumButton.gameObject);
+                SetInactiveButtonColour(hardButton.gameObject);
+                break;
+            case 1:
+                SetActiveButtonColour(mediumButton.gameObject);
+                selectedDifficulty = Difficulties.MEDIUM;
+                SetInactiveButtonColour(easyButton.gameObject);
+                SetInactiveButtonColour(hardButton.gameObject);
+                break;
+            case 2:
+                SetActiveButtonColour(hardButton.gameObject);
+                selectedDifficulty = Difficulties.HARD;
+                SetInactiveButtonColour(easyButton.gameObject);
+                SetInactiveButtonColour(mediumButton.gameObject);
+                break;
         }
     }
 
     public void StartGame(){
-        if (selectedDifficulty == Difficulties.HARD){
+        if(selectedDifficulty == Difficulties.HARD){
             //top left
             Instantiate(enemyBox,new Vector3(11.1999998f,0.0199999996f,-10.3000002f),enemyBox.transform.rotation);
             //top right
@@ -115,20 +158,21 @@ public class GameManager : MonoBehaviour
 
     public void EndGame(string causeOfFailure){
         isGameActive = false;
-        DestroyAllEnemies("Cylinder");
-        DestroyAllEnemies("Shield Cylinder");
-        DestroyAllEnemies("Sphere");
-        DestroyAllEnemies("Shield Sphere");
-        DestroyAllEnemies("Homing Cone");
-        DestroyAllEnemies("Spiral Sphere");
-        DestroyAllEnemies("Enemy Laser");
-        DestroyAllEnemies("Laser");
+        DestroyAllClones("Cylinder");
+        DestroyAllClones("Shield Cylinder");
+        DestroyAllClones("Sphere");
+        DestroyAllClones("Shield Sphere");
+        DestroyAllClones("Homing Cone");
+        DestroyAllClones("Spiral Sphere");
+        DestroyAllClones("Enemy Laser");
+        DestroyAllClones("Enemy Box");
+        DestroyAllClones("Laser");
         StopAllCoroutines();
         CancelInvoke();
         nextWaveScreen.SetActive(false);
         endScreen.SetActive(true);
         causeOfFailureText.text = $"Cause of Failure: {causeOfFailure}";
-        if (hasPassedHighestWave){
+        if(hasPassedHighestWave){
             passedHighestWaveText.text = $"Highest Wave Passed! Highest Wave ({selectedDifficulty.ToString().ToLower()}): {wave}";
         }
     }
@@ -138,7 +182,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void MovementRestrictions(GameObject objectToDestroy){
-        if (objectToDestroy.transform.position.x < -40 || objectToDestroy.transform.position.x > 40 || objectToDestroy.transform.position.z > 40 || objectToDestroy.transform.position.z < -40){
+        if(objectToDestroy.transform.position.x < -40 || objectToDestroy.transform.position.x > 40 || objectToDestroy.transform.position.z > 40 || objectToDestroy.transform.position.z < -40){
             Destroy(objectToDestroy);
         }
     }
@@ -149,7 +193,7 @@ public class GameManager : MonoBehaviour
     void SpawnWave(){
         switch(selectedDifficulty){
             case Difficulties.EASY:
-                if (wave<4){ //wave 1,2,3
+                if(wave<4){ //wave 1,2,3
                     SpawnEnemies(0,2,3);
                     numOfEnemies = 3;
                 }
@@ -164,7 +208,8 @@ public class GameManager : MonoBehaviour
                 CheckHighestWave("highestWaveEasy",highestWaveEasyText,"Easy");
                 break;
             case Difficulties.MEDIUM or Difficulties.HARD:
-                if (wave%5==0){
+                if(wave%5==0){
+                    isSpiralWave = true;
                     GameObject spiralEnemy = enemies[5];
                     Instantiate(spiralEnemy,new Vector3(1.29999995f,-0.119999997f,-21f),enemies[5].transform.rotation);
                     GameObject cylinder1 = enemies[0];
@@ -176,7 +221,8 @@ public class GameManager : MonoBehaviour
                     numOfEnemies = 4;
                 }
                 else{
-                    if (wave<4){ //wave 1,2,3
+                    isSpiralWave = false;
+                    if(wave<4){ //wave 1,2,3
                         SpawnEnemies(0,2,3);
                         numOfEnemies = 3;
                     }
@@ -216,7 +262,7 @@ public class GameManager : MonoBehaviour
     }
 
     void CheckHighestWave(string waveToExamine, TextMeshProUGUI textToChange, string textForWave){
-        if (wave > PlayerPrefs.GetInt(waveToExamine)){
+        if(wave > PlayerPrefs.GetInt(waveToExamine)){
             PlayerPrefs.SetInt(waveToExamine,wave);
             PlayerPrefs.Save();
             textToChange.text = $"{textForWave}: {wave}";
@@ -229,9 +275,9 @@ public class GameManager : MonoBehaviour
         for(int i=0;i<numOfEnemiesToSpawn;i++){
             int randEnemyIndex = Random.Range(lowestEnemyRange,highestEnemyRange);
             GameObject enemyToSpawn = enemies[randEnemyIndex];
-            if (enemyToSpawn.CompareTag("Shield Sphere")){
+            if(enemyToSpawn.CompareTag("Shield Sphere")){
                 numOfShieldSpheres++;
-                if (numOfShieldSpheres > 1){
+                if(numOfShieldSpheres > 1){
                     enemyToSpawn = enemies[2];
                 }
             }
@@ -248,8 +294,8 @@ public class GameManager : MonoBehaviour
                     enemyToSpawn.GetComponent<BoxCollider>().enabled = false;
                 }
                 Collider[] hitColliders = Physics.OverlapBox(posToSpawnOn, boxSize / 2, enemyToSpawn.transform.rotation);
-                if (hitColliders.Length > 0){
-                    if (hitColliders[0].CompareTag("Ground")){
+                if(hitColliders.Length > 0){
+                    if(hitColliders[0].CompareTag("Ground")){
                         isGoodSpawn = true;
                     }
                 }
@@ -261,23 +307,34 @@ public class GameManager : MonoBehaviour
         } 
     }
 
-    void DestroyAllEnemies(string enemyType){
+    void DestroyAllClones(string enemyType){
         GameObject[] enemies = GameObject.FindGameObjectsWithTag(enemyType);
-        if (enemies.Length>0){
+        if(enemies.Length>0){
             foreach(GameObject enemy in enemies){
                 Destroy(enemy);
             }
         }
     }
 
-    public Vector3 GetMouseOnBoardPosition(){
+    public Vector3 GetMouseOnBoardPosition(out bool isOverPlayer){
         Ray ray;
         ray =  Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray,out RaycastHit hitData)){
-            return new Vector3(hitData.point.x,hitData.point.y + 0.5f, hitData.point.z);
+        Vector3 playerPos = playerController.GetPlayerPosition();
+        if(Physics.Raycast(ray,out RaycastHit hitData)){
+            bool isFarEnough = Vector3.Distance(hitData.point, playerPos) > 4f;
+            if (!hitData.collider.gameObject.CompareTag("Player") && isFarEnough){
+                lastGoodMousePos = new(hitData.point.x,hitData.point.y + 0.5f, hitData.point.z);
+                isOverPlayer = false;
+                return lastGoodMousePos;
+            }
+            else{
+                isOverPlayer = true;
+                return lastGoodMousePos;
+            }
         } 
         else{
-            return Vector3.forward;
+            isOverPlayer = true;
+            return lastGoodMousePos;
         }
     }
 
@@ -289,6 +346,14 @@ public class GameManager : MonoBehaviour
         return isGameActive;
     }
 
+    public bool GetIsSpiralWave(){
+        return isSpiralWave;
+    }
+
+    public bool GetIsUsingController(){
+        return Input.GetJoystickNames().Length > 0;
+    }
+
     public int GetNumOfEnemies(){
         return numOfEnemies;
     }
@@ -297,7 +362,12 @@ public class GameManager : MonoBehaviour
         return wave;
     }
 
-    void SetInactiveButtonColour(Button button){
+    void SetActiveButtonColour(GameObject button){
+        button.GetComponent<Image>().color = new Color32(127,122,103,255);
+        button.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
+    }
+
+    void SetInactiveButtonColour(GameObject button){
         button.GetComponent<Image>().color = new Color32(255,255,255,255);
         button.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().color = new Color32(0,0,0,255);
     }
@@ -313,7 +383,7 @@ public class GameManager : MonoBehaviour
     IEnumerator CountDown(){
         int timeLeft = 30;
         timerText.text = $"Time: {timeLeft}";
-        for (int i=0;i<30;i++){
+        for(int i=0;i<30;i++){
             yield return new WaitForSeconds(1);
             timeLeft--;
             timerText.text = $"Time: {timeLeft}";
