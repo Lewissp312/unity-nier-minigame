@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices.WindowsRuntime;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyLaser : MonoBehaviour
@@ -8,38 +6,40 @@ public class EnemyLaser : MonoBehaviour
     [SerializeField] private Material orange;
     [SerializeField] private ParticleSystem destroyEffectPurple;
     [SerializeField] private ParticleSystem destroyEffectOrange;
-    private Direction selectedDirection;
-    private readonly float speed = 10f;
+    private Direction direction;
     private GameManager gameManager;
-    private ParticleSystem destroyEffectCopy;
     private string enemyTag;
-
     private bool isOrange;
-    // Start is called before the first frame update
+    private readonly float speed = 10f;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Unity methods
+
     void Start()
     {
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
         int randNum = Random.Range(1,21);
-        //if the number is modularly divided by 3, make it purple for the 5th wave, otherwise it's orange. Just the inverse really
-        if (randNum%3==0){
-            //if the wave is not a special wave or the game mode is easy
-            if (!gameManager.GetIsSpiralWave()){
+        //This selection process decides if a laser is a destroyable one (orange) or not (purple)
+        if(randNum % 3 == 0){
+            if(!gameManager.GetIsSpiralWave()){
                 GetComponent<MeshRenderer>().material = orange;
                 isOrange = true;
             }
         }
         else{
-            if (gameManager.GetIsSpiralWave()){
-                GetComponent<MeshRenderer> ().material = orange;
+            if(gameManager.GetIsSpiralWave()){
+                //The odds are reversed for spiral waves so that it's easier to get a destroyable laser
+                //This creates more clusters of lasers that the player can destroy and pass through
+                GetComponent<MeshRenderer>().material = orange;
                 isOrange = true;
             }
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        switch(selectedDirection){
+        switch(direction){
             case Direction.FORWARD:
                 transform.Translate(speed * Time.deltaTime * Vector3.forward);
                 break;
@@ -56,31 +56,38 @@ public class EnemyLaser : MonoBehaviour
         gameManager.MovementRestrictions(gameObject);
     }
 
-    void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision other)
     {
-        if (collision.gameObject.CompareTag("Laser") && isOrange){
-            Destroy(collision.gameObject);
+        if(other.gameObject.CompareTag("Laser") && isOrange){
+            gameManager.PlayHitEffect(destroyEffectOrange,transform.position);
+            Destroy(other.gameObject);
             Destroy(gameObject);
         }
-        if (collision.gameObject.CompareTag("Enemy Box")){
-            if (isOrange){
-                destroyEffectCopy = Instantiate(destroyEffectOrange,transform.position,transform.rotation);
+        if(other.gameObject.CompareTag("Enemy Box")){
+            if(isOrange){
+                gameManager.PlayHitEffect(destroyEffectOrange,transform.position);
             }
             else{
-                destroyEffectCopy = Instantiate(destroyEffectPurple,transform.position,transform.rotation);
+                gameManager.PlayHitEffect(destroyEffectPurple,transform.position);
             }
-            destroyEffectCopy.Play();
-            Destroy(destroyEffectCopy.gameObject,destroyEffectCopy.main.duration);
             Destroy(gameObject);
         }   
     }
 
-    public void SetSelectedDirection(Direction direction){
-        selectedDirection = direction;
-    }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Get methods
 
     public string GetEnemyTag(){
         return enemyTag;
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Set methods
+
+    public void SetSelectedDirection(Direction direction){
+        this.direction = direction;
     }
 
     public void SetEnemyTag(string enemyTag){
