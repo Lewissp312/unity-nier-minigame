@@ -1,6 +1,4 @@
 using System.Collections;
-// using System.Numerics;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -8,120 +6,103 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject laser;
     [SerializeField] private ParticleSystem damageEffect;
     [SerializeField] private LayerMask layersToHit;
-    private int lives = 3;
+    private GameManager gameManager;
+    private Vector3 laserPosition;
+    private Quaternion laserRotation;
+    private Rigidbody rb;
+    private int lives;
+    private bool canShoot;
+    private bool isDamageable;
+    private bool hasTouchedEnemyBox;
     private readonly float speed = 15;
     private readonly float xBoundRight = -16.5f;
     private readonly float xBoundLeft = 20.5f;
     private readonly float zBoundDown = 15.7f;
     private readonly float zBoundUp = -21.3f;
-    private Vector3 laserPosition;
-    private Vector3 stickDirection;
-    private Quaternion laserRotation;
-    private Rigidbody rb;
-    private bool canShoot = true;
-    private bool isDamageable = true;
-    private bool hasTouchedEnemyBox = false;
-    private GameManager gameManager;
-    private string[] controllers;
 
-    // Start is called before the first frame update
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Unity methods
+
     void Start()
     {
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
         rb = GetComponent<Rigidbody>();
+        lives = 3;
+        canShoot = true;
+        isDamageable = true;
     }
 
     void FixedUpdate(){
-        if (gameManager.GetIsGameActive()){
+        if(gameManager.GetIsGameActive()){
             float horizontalMovement = Input.GetAxis("Horizontal");
             float verticalMovement = Input.GetAxis("Vertical");
             Vector3 movement = new(-horizontalMovement, 0.0f, -verticalMovement);
             rb.MovePosition(rb.position + speed * Time.fixedDeltaTime * movement);
-            if (gameManager.GetIsUsingController()){
+
+            if(gameManager.GetIsUsingController()){
                 float rightStickHorizontal = Input.GetAxis("RightStickHorizontal");
                 float rightStickVertical = Input.GetAxis("RightStickVertical");
                 Vector3 direction = new(-rightStickHorizontal, 0.0f, rightStickVertical);
-                if (direction.magnitude > 0.1f) // Prevents jitter when the stick is near the center
+                //Prevents the reading of very small movements of the right stick
+                if(direction.magnitude > 0.1f)
                 {
-                    // direction.Normalize();
                     Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+                    //Quaternion.Slerp makes it so that the player turns to face the new rotation,
+                    //rather than facing it straight away
                     rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 20 * Time.fixedDeltaTime));
-                    // rb.MoveRotation(targetRotation);
                 }
             }
+            //Prevents any of the enemies or lasers having an impact on the player's movement
             rb.velocity = Vector3.zero;
+            MovementRestrictions();
         }
     }
 
-    //old: 1000, 1000, snap disabled
-    //new: 3,3,snap enabled
-
-    //Vector3 direction = new(-rightStickVertical, 0.0f, rightStickHorizontal); - bottom right and top left work
-    //Vector3 direction = new(-rightStickHorizontal, 0.0f, -rightStickHorizontal); - top right and bottom left work (sort of, without registering of others)
-
-    // Update is called once per frame
     void Update()
     {
-        if (gameManager.GetIsGameActive()){
-            
-            MovementRestrictions();
-            if ((Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2) || Input.GetKey(KeyCode.JoystickButton5)) && canShoot){
+        if(gameManager.GetIsGameActive()){
+            if((Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2) || 
+            Input.GetKey(KeyCode.JoystickButton5)) && canShoot){
                 gameManager.GetMouseOnBoardPosition(out bool isOverPlayer);
-                if (gameManager.GetIsUsingController() || !isOverPlayer){
+                //Lasers will not be fired if the mouse is hovering over or near the player,
+                //as this can lead to some erroneous paths for the lasers
+                if(gameManager.GetIsUsingController() || !isOverPlayer){
                     laserPosition = (transform.forward * 2) + transform.position;
                     laserRotation = transform.rotation * Quaternion.Euler(90,0,0);
                     Instantiate(laser,laserPosition,laserRotation);
                     StartCoroutine(WaitToShoot());
                 }
             }
-            if (!gameManager.GetIsUsingController()){
+            if(!gameManager.GetIsUsingController()){
                 transform.LookAt(gameManager.GetMouseOnBoardPosition(out bool isOverPlayer));
             }
         }
         
     }
 
-    public Vector3 GetPlayerPosition(){
-        return transform.position;
-    }
-
-    void MovementRestrictions(){
-        Vector3 newPosition = rb.position;
-        if (newPosition.x < xBoundRight ){
-            newPosition.x = xBoundRight;
-        } else if(newPosition.x > xBoundLeft){
-            newPosition.x = xBoundLeft;
-        }
-        if (newPosition.z > zBoundDown ){
-            newPosition.z = zBoundDown;
-        } else if(newPosition.z < zBoundUp){
-            newPosition.z = zBoundUp;
-        }
-        rb.MovePosition(newPosition);
-    }
-
-    void OnCollisionEnter(Collision other){
-        if (other.gameObject.CompareTag("Enemy Box") && !hasTouchedEnemyBox){
+     void OnCollisionEnter(Collision other){
+        //The hasTouchedEnemyBox bool prevents any erroneous behaviour from the player staying within the box,
+        //such as being damaged repeatedly
+        if(other.gameObject.CompareTag("Enemy Box") && !hasTouchedEnemyBox){
             canShoot = false;
             hasTouchedEnemyBox = true;
-            ParticleSystem damageEffectCopy = Instantiate(damageEffect,transform.position,transform.rotation);
-            damageEffectCopy.Play();
-            Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
+            gameManager.PlayHitEffect(damageEffect,transform.position);
             lives--;
-            if (lives<=0){
+            if(lives<=0){
                 gameManager.EndGame("Enemy Box");
                 Destroy(gameObject);
             }
             else{
+                //This destroys one of the two cubes behind the player
                 Destroy(transform.GetChild(0).gameObject);
             }
         }
-        if (other.gameObject.CompareTag("Enemy Laser") && isDamageable){
-            ParticleSystem damageEffectCopy = Instantiate(damageEffect,transform.position,transform.rotation);
-            damageEffectCopy.Play();
-            Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
+        //isDamageable ensures that the player is not immediately killed by a cluster of lasers 
+        if(other.gameObject.CompareTag("Enemy Laser") && isDamageable){
+            gameManager.PlayHitEffect(damageEffect,transform.position);
             lives--;
-            if (lives<=0){
+            if(lives <= 0){
                 gameManager.EndGame(other.gameObject.GetComponent<EnemyLaser>().GetEnemyTag());
                 Destroy(gameObject);
             }
@@ -136,20 +117,50 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionExit(Collision other)
     {
-        if (other.gameObject.CompareTag("Enemy Box")){
+        if(other.gameObject.CompareTag("Enemy Box")){
             hasTouchedEnemyBox = false;
             canShoot = true;
-            rb.velocity = Vector3.zero;
         }
     }
 
     void OnCollisionStay(Collision other)
     {
-        if (other.gameObject.CompareTag("Enemy Box")){
+        if(other.gameObject.CompareTag("Enemy Box")){
             hasTouchedEnemyBox = true;
             canShoot = false;
         }
     }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//PlayerController methods
+
+    public Vector3 GetPlayerPosition(){
+        return transform.position;
+    }
+
+    void MovementRestrictions(){
+        Vector3 newPosition = rb.position;
+        if(newPosition.x < xBoundRight ){
+            newPosition.x = xBoundRight;
+        } 
+        else if(newPosition.x > xBoundLeft){
+            newPosition.x = xBoundLeft;
+        }
+
+        if(newPosition.z > zBoundDown ){
+            newPosition.z = zBoundDown;
+        } 
+        else if(newPosition.z < zBoundUp){
+            newPosition.z = zBoundUp;
+        }
+
+        rb.MovePosition(newPosition);
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//IEnumerators
 
     IEnumerator WaitToShoot(){
         canShoot = false;

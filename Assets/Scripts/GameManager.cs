@@ -1,7 +1,5 @@
-// using System;
 using System.Collections;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -35,13 +33,13 @@ public class GameManager : MonoBehaviour
     private int wave;
     private int numOfEnemies;
 
-    // Start is called before the first frame update
     void Start()
     {
         playerController = GameObject.Find("Player").GetComponent<PlayerController>();
         selectedDifficulty = Difficulties.MEDIUM;
-        numOfEnemies = 3;
         wave = 1;
+        isBetweenWaves = true;
+        //Initialising high scores if the player doesn't have any
         if(!PlayerPrefs.HasKey("highestWaveEasy")){
             PlayerPrefs.SetInt("highestWaveEasy",1);
             PlayerPrefs.Save();
@@ -59,23 +57,36 @@ public class GameManager : MonoBehaviour
         highestWaveHardText.text = $"Hard: {PlayerPrefs.GetInt("highestWaveHard")}";
     }
 
-    // Update is called once per frame
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Unity methods
+
     void Update()
     {
-        if(startScreen.activeSelf){
+        if(numOfEnemies <= 0 && !isBetweenWaves && isGameActive){
+            DestroyAllClones("Enemy Laser");
+            //The countdown coroutine needs to be a variable because it needs to be reset
+            StopCoroutine(countDownCoroutine);
+            nextWaveScreen.SetActive(true);
+            isBetweenWaves = true;
+            wave++;
+            StartCoroutine(WaitForNextWave());
+        }
+        else if(startScreen.activeSelf){
             if(GetIsUsingController()){
+                //Makes the controller button prompts appear
                 startScreen.transform.GetChild(0).gameObject.SetActive(true);
                 startScreen.transform.GetChild(1).gameObject.GetComponent<TextMeshProUGUI>().text = 
                 "Use the left stick to move. Move the right stick to change your firing direction. Hold R1/RB to fire.";
-                //square / X
+                //Square / X
                 if(Input.GetKeyDown(KeyCode.JoystickButton0)){
                     SelectDifficulty(0);
                 }
-                //triangle / Y
+                //Triangle / Y
                 else if(Input.GetKeyDown(KeyCode.JoystickButton3)){
                     SelectDifficulty(1);
                 }
-                //circle / B
+                //Circle / B
                 else if(Input.GetKeyDown(KeyCode.JoystickButton2)){
                     SelectDifficulty(2);
                 }
@@ -85,6 +96,7 @@ public class GameManager : MonoBehaviour
                 }
             }
             else{
+                //Removes the controller button prompts
                 startScreen.transform.GetChild(0).gameObject.SetActive(false);
                 startScreen.transform.GetChild(1).gameObject.GetComponent<TextMeshProUGUI>().text = 
                 "Use WASD to move. Move the mouse to change your firing direction. Hold right or left click to fire.";
@@ -92,6 +104,7 @@ public class GameManager : MonoBehaviour
         }
         else if(endScreen.activeSelf){
             if(GetIsUsingController()){
+                //Makes the controller button prompts appear
                 endScreen.transform.GetChild(0).gameObject.SetActive(true);
                 // X / A
                 if(Input.GetKeyDown(KeyCode.JoystickButton1)){
@@ -99,19 +112,15 @@ public class GameManager : MonoBehaviour
                 }
             }
             else{
+                //Removes the controller button prompts
                 endScreen.transform.GetChild(0).gameObject.SetActive(false);
             }
         }
-        if(numOfEnemies<=0 && !isBetweenWaves && isGameActive){
-            DestroyAllClones("Enemy Laser");
-            //needs to be a variable because it needs to be reset
-            StopCoroutine(countDownCoroutine);
-            nextWaveScreen.SetActive(true);
-            isBetweenWaves = true;
-            wave++;
-            StartCoroutine(WaitForNextWave());
-        }
     }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//GameManager methods
 
     public void SelectDifficulty(int selectedOption){
         switch(selectedOption){
@@ -138,15 +147,15 @@ public class GameManager : MonoBehaviour
 
     public void StartGame(){
         if(selectedDifficulty == Difficulties.HARD){
-            //top left
+            //Top left
             Instantiate(enemyBox,new Vector3(11.1999998f,0.0199999996f,-10.3000002f),enemyBox.transform.rotation);
-            //top right
+            //Top right
             Instantiate(enemyBox,new Vector3(-8.19999981f,0.0199999996f,-10.3000002f),enemyBox.transform.rotation);
-            //bottom left
+            //Bottom left
             Instantiate(enemyBox,new Vector3(11.3000002f,0.0199999996f,7.4000001f),enemyBox.transform.rotation);
-            //bottom right
+            //Bottom right
             Instantiate(enemyBox,new Vector3(-8.19999981f,0.0199999996f,7.4000001f),enemyBox.transform.rotation);
-            //centre
+            //Centre
             Instantiate(enemyBox,new Vector3(1.39999998f,0.0199999996f,-1f),enemyBox.transform.rotation);
         }
         isGameActive = true;
@@ -182,7 +191,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void MovementRestrictions(GameObject objectToDestroy){
-        if(objectToDestroy.transform.position.x < -40 || objectToDestroy.transform.position.x > 40 || objectToDestroy.transform.position.z > 40 || objectToDestroy.transform.position.z < -40){
+        if(objectToDestroy.transform.position.x < -60 || objectToDestroy.transform.position.x > 60 || objectToDestroy.transform.position.z > 60 || objectToDestroy.transform.position.z < -60){
             Destroy(objectToDestroy);
         }
     }
@@ -190,25 +199,35 @@ public class GameManager : MonoBehaviour
     public void DecreaseNumOfEnemies(){
         numOfEnemies--;
     }
+
+    public void PlayHitEffect(ParticleSystem damageEffect, Vector3 position){
+        ParticleSystem damageEffectCopy = Instantiate(damageEffect,position,transform.rotation);
+        damageEffectCopy.Play();
+        Destroy(damageEffectCopy.gameObject,damageEffectCopy.main.duration);
+    }
+
+
     void SpawnWave(){
         switch(selectedDifficulty){
             case Difficulties.EASY:
-                if(wave<4){ //wave 1,2,3
-                    SpawnEnemies(0,2,3);
-                    numOfEnemies = 3;
-                }
-                else if(wave<7){ //wave 7,8,9
-                    SpawnEnemies(2,5,3);
-                    numOfEnemies = 3;
-                }
-                else if(wave>=7){ //wave 13,14,15
-                    SpawnEnemies(0,5,3);
-                    numOfEnemies = 3;
+                switch(wave){
+                    case < 4: //wave 1,2,3
+                        SpawnEnemies(0,2,3);
+                        numOfEnemies = 3;
+                        break;
+                    case < 7: //wave 7,8,9
+                        SpawnEnemies(2,5,3);
+                        numOfEnemies = 3;
+                        break;
+                    case >= 7: //wave 13,14,15
+                        SpawnEnemies(0,5,3);
+                        numOfEnemies = 3;
+                        break;
                 }
                 CheckHighestWave("highestWaveEasy",highestWaveEasyText,"Easy");
                 break;
             case Difficulties.MEDIUM or Difficulties.HARD:
-                if(wave%5==0){
+                if(wave % 5 == 0){
                     isSpiralWave = true;
                     GameObject spiralEnemy = enemies[5];
                     Instantiate(spiralEnemy,new Vector3(1.29999995f,-0.119999997f,-21f),enemies[5].transform.rotation);
@@ -222,29 +241,31 @@ public class GameManager : MonoBehaviour
                 }
                 else{
                     isSpiralWave = false;
-                    if(wave<4){ //wave 1,2,3
-                        SpawnEnemies(0,2,3);
-                        numOfEnemies = 3;
-                    }
-                    else if(wave<7){ //wave 4,5,6
-                        SpawnEnemies(0,2,6);
-                        numOfEnemies = 6;
-                    }
-                    else if(wave<10){ //wave 7,8,9
-                        SpawnEnemies(2,5,3);
-                        numOfEnemies = 3;
-                    }
-                    else if(wave<13){ //wave 10,11,12
-                        SpawnEnemies(2,5,6);
-                        numOfEnemies = 6;
-                    }
-                    else if(wave<16){ //wave 13,14,15
-                        SpawnEnemies(0,5,3);
-                        numOfEnemies = 3;
-                    }
-                    else if(wave>=16){ //waves beyond
-                        SpawnEnemies(0,5,6);
-                        numOfEnemies = 6;
+                    switch (wave){
+                        case < 4: //wave 1,2,3
+                            SpawnEnemies(0,2,3);
+                            numOfEnemies = 3;
+                            break;
+                        case < 7: //wave 4,5,6
+                            SpawnEnemies(0,2,6);
+                            numOfEnemies = 6;
+                            break;
+                        case < 10: //wave 7,8,9
+                            SpawnEnemies(2,5,3);
+                            numOfEnemies = 3;
+                            break;
+                        case < 13: //wave 10,11,12
+                            SpawnEnemies(2,5,6);
+                            numOfEnemies = 6;
+                            break;
+                        case < 16: //wave 13,14,15
+                            SpawnEnemies(0,5,3);
+                            numOfEnemies = 3;
+                            break;
+                        case >= 16: //waves beyond
+                            SpawnEnemies(0,5,6);
+                            numOfEnemies = 6;
+                            break;
                     }
                 }
                 switch(selectedDifficulty){
@@ -272,12 +293,14 @@ public class GameManager : MonoBehaviour
 
     void SpawnEnemies(int lowestEnemyRange, int highestEnemyRange, int numOfEnemiesToSpawn){
         int numOfShieldSpheres = 0;
-        for(int i=0;i<numOfEnemiesToSpawn;i++){
+        for(int i = 0;i < numOfEnemiesToSpawn;i++){
             int randEnemyIndex = Random.Range(lowestEnemyRange,highestEnemyRange);
             GameObject enemyToSpawn = enemies[randEnemyIndex];
             if(enemyToSpawn.CompareTag("Shield Sphere")){
                 numOfShieldSpheres++;
                 if(numOfShieldSpheres > 1){
+                    //Shield spheres will release their shields when all other enemies have been
+                    //defeated, so there should only be one in any wave
                     enemyToSpawn = enemies[2];
                 }
             }
@@ -296,6 +319,8 @@ public class GameManager : MonoBehaviour
                 Collider[] hitColliders = Physics.OverlapBox(posToSpawnOn, boxSize / 2, enemyToSpawn.transform.rotation);
                 if(hitColliders.Length > 0){
                     if(hitColliders[0].CompareTag("Ground")){
+                        //The enemy will almost always collide with the ground, so when this is the only collider,
+                        //the spawn position is fine
                         isGoodSpawn = true;
                     }
                 }
@@ -306,20 +331,24 @@ public class GameManager : MonoBehaviour
             Instantiate(enemyToSpawn,posToSpawnOn,enemyToSpawn.transform.rotation);
         } 
     }
-
     void DestroyAllClones(string enemyType){
         GameObject[] enemies = GameObject.FindGameObjectsWithTag(enemyType);
-        if(enemies.Length>0){
+        if(enemies.Length > 0){
             foreach(GameObject enemy in enemies){
                 Destroy(enemy);
             }
         }
     }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Get methods
+
     public Vector3 GetMouseOnBoardPosition(out bool isOverPlayer){
         Ray ray;
         ray =  Camera.main.ScreenPointToRay(Input.mousePosition);
         Vector3 playerPos = playerController.GetPlayerPosition();
+        //If the ray hits a collider
         if(Physics.Raycast(ray,out RaycastHit hitData)){
             bool isFarEnough = Vector3.Distance(hitData.point, playerPos) > 4f;
             if (!hitData.collider.gameObject.CompareTag("Player") && isFarEnough){
@@ -338,10 +367,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public Difficulties GetDifficulty(){
-        return selectedDifficulty;
-    }
-
     public bool GetIsGameActive(){
         return isGameActive;
     }
@@ -358,19 +383,28 @@ public class GameManager : MonoBehaviour
         return numOfEnemies;
     }
 
-    public int GetWave(){
-        return wave;
-    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Set methods
 
     void SetActiveButtonColour(GameObject button){
+        //Button background set to dark cream-ish colour
         button.GetComponent<Image>().color = new Color32(127,122,103,255);
+        //Text set to white
         button.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
     }
 
     void SetInactiveButtonColour(GameObject button){
+        //Button background set to white
         button.GetComponent<Image>().color = new Color32(255,255,255,255);
+        //Text set to black
         button.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().color = new Color32(0,0,0,255);
     }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//IEnumerators
 
 
     IEnumerator WaitForNextWave(){
@@ -383,7 +417,7 @@ public class GameManager : MonoBehaviour
     IEnumerator CountDown(){
         int timeLeft = 30;
         timerText.text = $"Time: {timeLeft}";
-        for(int i=0;i<30;i++){
+        for(int i = 0;i < 30;i++){
             yield return new WaitForSeconds(1);
             timeLeft--;
             timerText.text = $"Time: {timeLeft}";

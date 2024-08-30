@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8025371352793362169}
   - component: {fileID: 7155734531190924468}
   m_Layer: 0
-  m_Name: Shield
+  m_Name: Shield 1
   m_TagString: Shield
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -110,7 +110,7 @@ GameObject:
   - component: {fileID: 6532682555519476367}
   - component: {fileID: 8653849872366695625}
   m_Layer: 0
-  m_Name: Shield (1)
+  m_Name: Shield 2
   m_TagString: Shield
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
