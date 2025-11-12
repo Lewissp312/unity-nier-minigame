@@ -54,7 +54,7 @@ public class PlayerController : MonoBehaviour
                 }
             }
             //Prevents any of the enemies or lasers having an impact on the player's movement
-            rb.velocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
             MovementRestrictions();
         }
     }

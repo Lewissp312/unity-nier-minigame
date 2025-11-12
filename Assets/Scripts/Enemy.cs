@@ -47,7 +47,7 @@ public class Enemy : MonoBehaviour
     {
         if(gameManager.GetIsGameActive()){
             //Prevents stationary enemies sliding around
-            rb.velocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
             if(isMovingEnemy){
                 transform.position = Vector3.MoveTowards(transform.position,posToMoveTo,speed * Time.deltaTime);
             }
